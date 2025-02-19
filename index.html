@@ -15,39 +15,52 @@
         <section class="filters-section">
             <h2><span class="material-icons">filter_alt</span>Фильтры</h2>
             <div class="filters">
-                <button class="filter-btn" id="buyExchanges">
-                    <span>Покупка</span>
-                    <span class="material-icons">expand_more</span>
-                </button>
-                <div class="dropdown-content" id="buyExchangesList">
-                    <label><input type="checkbox"> Binance</label><br>
-                    <label><input type="checkbox"> Kraken</label><br>
-                    <label><input type="checkbox"> KuCoin</label>
+                <div>
+                    <button class="filter-btn" id="buyExchanges">
+                        <span>Покупка</span>
+                        <span class="material-icons">expand_more</span>
+                    </button>
+                    <div class="dropdown-content" id="buyExchangesList">
+                        <label><input type="checkbox"> Binance</label>
+                        <label><input type="checkbox"> Kraken</label>
+                        <label><input type="checkbox"> KuCoin</label>
+                        <label><input type="checkbox"> Bybit</label>
+                        <label><input type="checkbox"> OKX</label>
+                        <label><input type="checkbox"> Gate.io</label>
+                    </div>
                 </div>
 
-                <button class="filter-btn" id="sellExchanges">
-                    <span>Продажа</span>
-                    <span class="material-icons">expand_more</span>
-                </button>
-                <div class="dropdown-content" id="sellExchangesList">
-                    <label><input type="checkbox"> Binance</label><br>
-                    <label><input type="checkbox"> Kraken</label><br>
-                    <label><input type="checkbox"> KuCoin</label>
+                <div>
+                    <button class="filter-btn" id="sellExchanges">
+                        <span>Продажа</span>
+                        <span class="material-icons">expand_more</span>
+                    </button>
+                    <div class="dropdown-content" id="sellExchangesList">
+                        <label><input type="checkbox"> Binance</label>
+                        <label><input type="checkbox"> Kraken</label>
+                        <label><input type="checkbox"> KuCoin</label>
+                        <label><input type="checkbox"> Bybit</label>
+                        <label><input type="checkbox"> OKX</label>
+                        <label><input type="checkbox"> Gate.io</label>
+                    </div>
                 </div>
 
                 <select class="update-interval">
-                    <option value="1">1с</option>
-                    <option value="5">5с</option>
-                    <option value="10">10с</option>
-                    <option value="15">15с</option>
-                    <option value="30">30с</option>
-                    <option value="45">45с</option>
-                    <option value="60">60с</option>
+                    <option value="1">Обновление: 1с</option>
+                    <option value="5">Обновление: 5с</option>
+                    <option value="10">Обновление: 10с</option>
+                    <option value="15">Обновление: 15с</option>
+                    <option value="30">Обновление: 30с</option>
+                    <option value="45">Обновление: 45с</option>
+                    <option value="60">Обновление: 60с</option>
                     <option value="0">Не обновлять</option>
                 </select>
             </div>
         </section>
-
+	<button id="addPairBtn" class="add-pair-btn">
+    <span class="material-icons">add</span>
+    Добавить пару
+</button>
         <div class="view-toggle">
             <button class="view-btn active" data-view="list">
                 <span class="material-icons">view_list</span>
@@ -60,7 +73,43 @@
         <section class="pairs-section">
             <h2><span class="material-icons">currency_exchange</span>Торговые пары</h2>
             <div class="pairs-container" id="pairsContainer">
-                <!-- Pairs will be added here -->
+                <!-- Пример карточки для режима сетки -->
+                <div class="pair-item">
+                    <div class="exchanges">
+                        <div class="buy-exchange">
+                            <span class="exchange-name">Binance</span>
+                            <span class="exchange-price">$50,000</span>
+                        </div>
+                        <div class="sell-exchange">
+                            <span class="exchange-name">Kraken</span>
+                            <span class="exchange-price">$49,800</span>
+                        </div>
+                    </div>
+                    <div class="pair-details">
+                        <div class="pair-info">
+                            <div class="info-item">
+                                <span class="label">Пара</span>
+                                <span class="value">BTC/USDT</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="label">Сеть</span>
+                                <span class="value">BTC</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="label">Спред</span>
+                                <span class="value">0.4%</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="label">Комиссия</span>
+                                <span class="value">0.001 BTC</span>
+                            </div>
+                        </div>
+                        <div class="bottom-info">
+                            <span class="pair-timer">15с</span>
+                            <span class="material-icons pin-icon">push_pin</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
     </div>
