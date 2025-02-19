@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?ver=3">
+    <link rel="stylesheet" href="styles.css?ver=4">
 </head>
 <body>
     <div class="container">
@@ -19,6 +19,26 @@
                 <span class="username">@username</span>
             </div>
             <div class="filters">
+                <div>
+                    <button class="filter-btn" id="cryptoFilter">
+                        <span>Монеты</span>
+                        <span class="material-icons">expand_more</span>
+                    </button>
+                    <div class="dropdown-content" id="cryptoList">
+                        <div class="search-container">
+                            <input type="text" id="cryptoSearch" placeholder="Поиск монет...">
+                        </div>
+                        <div class="crypto-items">
+                            <label class="select-all">
+                                <input type="checkbox" id="selectAllCrypto"> Выбрать все
+                            </label>
+                            <div class="crypto-list">
+                                <!-- Сюда будут добавляться монеты из массива -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div>
                     <button class="filter-btn" id="buyExchanges">
                         <span>Покупка</span>
@@ -49,16 +69,24 @@
                     </div>
                 </div>
 
-                <select class="update-interval">
-                    <option value="1">Обновление: 1с</option>
-                    <option value="5">Обновление: 5с</option>
-                    <option value="10">Обновление: 10с</option>
-                    <option value="15">Обновление: 15с</option>
-                    <option value="30">Обновление: 30с</option>
-                    <option value="45">Обновление: 45с</option>
-                    <option value="60">Обновление: 60с</option>
-                    <option value="0">Не обновлять</option>
-                </select>
+                <div>
+                    <button class="filter-btn" id="updateInterval">
+                        <span>Обновление: 1с</span>
+                        <span class="material-icons">expand_more</span>
+                    </button>
+                    <div class="dropdown-content" id="intervalList">
+                        <div class="interval-items">
+                            <label><input type="radio" name="interval" value="1" checked> Обновление: 1с</label>
+                            <label><input type="radio" name="interval" value="5"> Обновление: 5с</label>
+                            <label><input type="radio" name="interval" value="10"> Обновление: 10с</label>
+                            <label><input type="radio" name="interval" value="15"> Обновление: 15с</label>
+                            <label><input type="radio" name="interval" value="30"> Обновление: 30с</label>
+                            <label><input type="radio" name="interval" value="45"> Обновление: 45с</label>
+                            <label><input type="radio" name="interval" value="60"> Обновление: 60с</label>
+                            <label><input type="radio" name="interval" value="0"> Не обновлять</label>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -83,6 +111,6 @@
             </div>
         </section>
     </div>
-    <script src="script.js?v3"></script>
+    <script src="script.js?v4"></script>
 </body>
 </html>
