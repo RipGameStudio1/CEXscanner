@@ -20,6 +20,19 @@ body {
     padding: 20px;
 }
 
+/* Header и фильтры */
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.username {
+    color: #999;
+    font-size: 14px;
+}
+
 .filters-section {
     margin-bottom: 20px;
     border: 2px solid #333;
@@ -55,6 +68,7 @@ body {
     background-position: right 10px center;
 }
 
+/* Выпадающие списки */
 .filters > div {
     position: relative;
 }
@@ -70,6 +84,8 @@ body {
     border-radius: 10px;
     padding: 10px;
     z-index: 1000;
+    max-height: 250px;
+    overflow-y: auto;
 }
 
 .dropdown-content.show {
@@ -92,51 +108,115 @@ body {
     margin-right: 8px;
 }
 
-/* Базовые стили для карточки */
+/* Кнопка добавления пары */
+.add-pair-btn {
+    padding: 10px 20px;
+    border: 2px solid #333;
+    border-radius: 10px;
+    background: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 15px;
+    font-family: 'Comfortaa', cursive;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.add-pair-btn:hover {
+    background-color: #f5f5f5;
+}
+
+.add-pair-btn:active {
+    transform: scale(0.98);
+}
+
+/* Переключатель видов */
+.view-toggle {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.view-btn {
+    padding: 8px;
+    border: 2px solid #333;
+    border-radius: 10px;
+    background: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    transition: all 0.3s ease;
+}
+
+.view-btn.active {
+    background: #64b5f6;
+    color: white;
+}
+
+/* Карточки пар */
 .pair-item {
     margin-bottom: 15px;
     border: 2px solid #333;
     border-radius: 15px;
     overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform, opacity;
+    backface-visibility: hidden;
 }
 
 /* Стили для режима списка */
 .pairs-container:not(.grid) .pair-item {
     display: flex;
     align-items: stretch;
+    height: 120px;
 }
 
-.pairs-container:not(.grid) .info-item {
+.pairs-container:not(.grid) .exchanges {
     display: flex;
-    align-items: center;
-    gap: 5px;
+    flex-direction: column;
+    width: 120px;
 }
 
 .pairs-container:not(.grid) .buy-exchange,
 .pairs-container:not(.grid) .sell-exchange {
     width: 120px;
     padding: 15px;
+    height: 50%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    text-align: center;
 }
 
 .pairs-container:not(.grid) .exchange-name {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 700;
 }
 
 .pairs-container:not(.grid) .exchange-price {
-    display: inline-block;
+    opacity: 0;
+    transform: translateY(-10px);
 }
 
-.pairs-container:not(.grid) .bottom-info {
-    margin-left: auto;
+/* Обновляем стили для информационных элементов */
+.pairs-container:not(.grid) .info-item {
     display: flex;
-    align-items: center;
-    gap: 15px;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.pairs-container:not(.grid) .label {
+    color: #666;
+    font-size: 12px;
+}
+
+.pairs-container:not(.grid) .value {
+    font-size: 14px;
+    font-weight: 500;
 }
 
 .pairs-container:not(.grid) .pair-details {
@@ -153,33 +233,17 @@ body {
     align-items: center;
 }
 
-.pairs-container:not(.grid) .value,
-.pairs-container:not(.grid) .price-info {
-    font-weight: 500;
-}
-
-.pairs-container:not(.grid) .price-info {
-    display: inline-block;
-}
-
-.pairs-container:not(.grid) .label {
-    color: #666;
-    font-weight: 400;
-}
-
-.pairs-container:not(.grid) .value {
-    font-weight: 500;
-}
-
-.pairs-container:not(.grid) .pair-timer {
-    margin-left: auto;
-    color: #666;
-}
 /* Стили для режима сетки */
 .pairs-container.grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 15px;
+}
+
+.pairs-container.grid .pair-item {
+    height: 280px;
+    display: flex;
+    flex-direction: column;
 }
 
 .pairs-container.grid .exchanges {
@@ -206,47 +270,46 @@ body {
 .pairs-container.grid .exchange-price {
     font-size: 16px;
     color: #333;
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .pairs-container.grid .pair-details {
     padding: 15px;
     background: #f8f9fa;
+    flex-grow: 1;
 }
 
 .pairs-container.grid .pair-info {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
-    margin-bottom: 12px;
 }
 
-.pairs-container.grid .info-item {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+.pairs-container:not(.grid) .price-buy {
+    order: 2; /* Располагаем под price-sell */
 }
 
-.pairs-container.grid .label {
-    color: #666;
-    font-size: 13px;
+.pairs-container:not(.grid) .price-sell {
+    order: 1; /* Располагаем над price-buy */
 }
 
-.pairs-container.grid .value {
-    font-weight: 500;
-    font-size: 14px;
-}
-
-.pairs-container.grid .bottom-info {
-    display: flex;
-    justify-content: space-between;
+/* Специальные стили для цен в режиме списка */
+.pairs-container:not(.grid) .price-buy,
+.pairs-container:not(.grid) .price-sell {
+    flex-direction: row;
     align-items: center;
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px solid #ddd;
 }
 
-.pairs-container.grid .pair-timer {
-    color: #666;
+.pairs-container:not(.grid) .price-buy .label,
+.pairs-container:not(.grid) .price-sell .label {
+    display: none;
+}
+
+.pairs-container:not(.grid) .price-buy .value,
+.pairs-container:not(.grid) .price-sell .value {
+    font-size: 16px;
+    font-weight: 600;
 }
 
 /* Общие стили */
@@ -258,45 +321,49 @@ body {
     background: #ffcdd2;
 }
 
-.view-toggle {
+.info-item {
     display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
+    flex-direction: column;
+    gap: 4px;
 }
 
-.view-btn {
-    padding: 8px;
-    border: 2px solid #333;
-    border-radius: 10px;
-    background: white;
-    cursor: pointer;
+.label {
+    color: #666;
+    font-size: 13px;
+}
+
+.value {
+    font-weight: 500;
+}
+
+.bottom-info {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #ddd;
 }
 
-.view-btn.active {
-    background: #64b5f6;
-    color: white;
-}
-
-h2 {
-    margin-bottom: 15px;
-    font-size: 18px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.material-icons {
-    font-size: 18px;
+.pair-timer {
+    color: #666;
 }
 
 .pin-icon {
     cursor: pointer;
     color: #666;
+}
+
+/* Анимации */
+.transitioning .pair-item {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.transitioning .exchanges,
+.transitioning .pair-details,
+.transitioning .pair-info,
+.transitioning .info-item {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Медиа запросы */
@@ -310,25 +377,7 @@ h2 {
     }
 }
 
-/* Анимации и эффекты */
-.filter-btn:hover,
-.update-interval:hover,
-.view-btn:hover {
-    background-color: #f5f5f5;
-}
-
-.filter-btn:active,
-.update-interval:active,
-.view-btn:active {
-    transform: scale(0.98);
-}
-
 /* Стили для скролла */
-.dropdown-content {
-    max-height: 250px;
-    overflow-y: auto;
-}
-
 .dropdown-content::-webkit-scrollbar {
     width: 8px;
 }
@@ -347,31 +396,18 @@ h2 {
     background: #555;
 }
 
-.add-pair-btn {
-    padding: 10px 20px;
-    border: 2px solid #333;
-    border-radius: 10px;
-    background: white;
+/* Стили для закрепленных элементов */
+.pin-icon {
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 15px;
-    font-family: 'Comfortaa', cursive;
+    color: #666;
+    transition: color 0.3s ease;
 }
 
-.add-pair-btn:hover {
-    background-color: #f5f5f5;
-}
-
-.add-pair-btn:active {
-    transform: scale(0.98);
+.pin-icon.pinned {
+    color: #2196F3;
 }
 
 .pair-item {
-    transition: all 0.3s ease;
-}
-
-.info-item {
-    transition: all 0.3s ease;
+    order: 0;
+    transition: order 0.3s ease;
 }
