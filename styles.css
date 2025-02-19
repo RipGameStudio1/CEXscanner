@@ -38,6 +38,7 @@ body {
     border: 2px solid #333;
     border-radius: 15px;
     padding: 15px;
+    background: #f3f3f3;
 }
 
 .filters {
@@ -166,6 +167,32 @@ body {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     will-change: transform, opacity;
     backface-visibility: hidden;
+    order: 0;
+}
+
+/* Специальные стили для цен в режиме списка */
+.pairs-container:not(.grid) .price-buy,
+.pairs-container:not(.grid) .price-sell {
+    display: none;
+}
+
+.pairs-container:not(.grid) .price-buy .label,
+.pairs-container:not(.grid) .price-sell .label {
+    display: none;
+}
+
+.pairs-container:not(.grid) .price-buy .value,
+.pairs-container:not(.grid) .price-sell .value {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.pairs-container:not(.grid) .price-buy {
+    order: 2;
+}
+
+.pairs-container:not(.grid) .price-sell {
+    order: 1;
 }
 
 /* Стили для режима списка */
@@ -193,44 +220,65 @@ body {
 }
 
 .pairs-container:not(.grid) .exchange-name {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 700;
 }
 
 .pairs-container:not(.grid) .exchange-price {
-    opacity: 0;
-    transform: translateY(-10px);
-}
-
-/* Обновляем стили для информационных элементов */
-.pairs-container:not(.grid) .info-item {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.pairs-container:not(.grid) .label {
-    color: #666;
-    font-size: 12px;
-}
-
-.pairs-container:not(.grid) .value {
-    font-size: 14px;
-    font-weight: 500;
+    font-weight: 350;
+    opacity: 1;
+    transform: translateY(3px);
 }
 
 .pairs-container:not(.grid) .pair-details {
     display: flex;
     align-items: center;
     padding: 0 20px;
-    gap: 30px;
     flex-grow: 1;
+    height: 100%;
+    background: #f3f3f3;
 }
 
 .pairs-container:not(.grid) .pair-info {
     display: flex;
-    gap: 30px;
     align-items: center;
+    justify-content: space-between;
+    flex: 1;
+    gap: 10px;
+}
+
+.pairs-container:not(.grid) .info-item,
+.pairs-container:not(.grid) .pair-network-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+}
+
+.pairs-container:not(.grid) .bottom-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border-top: none;
+    padding-top: 0;
+    margin-top: 0;
+}
+
+.pairs-container:not(.grid) .pair-timer {
+    margin-right: 15px;
+}
+
+
+.pairs-container:not(.grid) .pair-network-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.pairs-container:not(.grid) .info-item.price-sell,
+.pairs-container:not(.grid) .info-item.price-buy {
+    display: none !important;
 }
 
 /* Стили для режима сетки */
@@ -276,8 +324,11 @@ body {
 
 .pairs-container.grid .pair-details {
     padding: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
     background: #f8f9fa;
-    flex-grow: 1;
 }
 
 .pairs-container.grid .pair-info {
@@ -286,30 +337,23 @@ body {
     gap: 12px;
 }
 
-.pairs-container:not(.grid) .price-buy {
-    order: 2; /* Располагаем под price-sell */
+.pairs-container:not(.grid) .info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
-.pairs-container:not(.grid) .price-sell {
-    order: 1; /* Располагаем над price-buy */
-}
-
-/* Специальные стили для цен в режиме списка */
-.pairs-container:not(.grid) .price-buy,
-.pairs-container:not(.grid) .price-sell {
-    flex-direction: row;
+.pairs-container.grid .bottom-info {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #ddd;
 }
 
-.pairs-container:not(.grid) .price-buy .label,
-.pairs-container:not(.grid) .price-sell .label {
-    display: none;
-}
-
-.pairs-container:not(.grid) .price-buy .value,
-.pairs-container:not(.grid) .price-sell .value {
-    font-size: 16px;
-    font-weight: 600;
+.pairs-container.grid .pair-network-group {
+    display: contents;
 }
 
 /* Общие стили */
@@ -336,15 +380,6 @@ body {
     font-weight: 500;
 }
 
-.bottom-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px solid #ddd;
-}
-
 .pair-timer {
     color: #666;
 }
@@ -352,6 +387,11 @@ body {
 .pin-icon {
     cursor: pointer;
     color: #666;
+    transition: color 0.3s ease;
+}
+
+.pin-icon.pinned {
+    color: #2196F3;
 }
 
 /* Анимации */
@@ -364,17 +404,6 @@ body {
 .transitioning .pair-info,
 .transitioning .info-item {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Медиа запросы */
-@media (max-width: 600px) {
-    .container {
-        padding: 10px;
-    }
-    
-    .pairs-container.grid {
-        grid-template-columns: 1fr;
-    }
 }
 
 /* Стили для скролла */
@@ -396,18 +425,257 @@ body {
     background: #555;
 }
 
-/* Стили для закрепленных элементов */
-.pin-icon {
-    cursor: pointer;
-    color: #666;
-    transition: color 0.3s ease;
+/* Медиа запросы */
+@media (max-width: 600px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .pairs-container.grid {
+        grid-template-columns: 1fr;
+    }
 }
 
-.pin-icon.pinned {
+@media (max-width: 600px) {
+    .pairs-container {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 15px !important;
+    }
+
+    .pair-item {
+        flex-direction: column !important;
+        height: auto !important;
+    }
+
+    .view-toggle {
+        display: none;
+    }
+}
+
+/* Анимации для карточек */
+.pair-item {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.pair-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+.pair-item::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    transition: 0.5s;
+}
+
+.pair-item:hover::after {
+    left: 100%;
+}
+
+/* Анимации для цен */
+@keyframes priceUpdate {
+    0% {
+        transform: scale(1);
+        color: inherit;
+    }
+    50% {
+        transform: scale(1.1);
+        color: #2196F3;
+    }
+    100% {
+        transform: scale(1);
+        color: inherit;
+    }
+}
+
+.exchange-price {
+    transition: all 0.3s ease;
+}
+
+.exchange-price.updating {
+    animation: priceUpdate 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Анимации для кнопок */
+.filter-btn,
+.add-pair-btn,
+.view-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.filter-btn:hover,
+.add-pair-btn:hover,
+.view-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.filter-btn:active,
+.add-pair-btn:active,
+.view-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+
+/* Анимация для pin-icon */
+@keyframes pinRotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    25% {
+        transform: rotate(20deg);
+    }
+    75% {
+        transform: rotate(-15deg);
+    }
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+.pin-icon {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.pin-icon:hover {
+    animation: pinRotate 0.5s ease;
     color: #2196F3;
 }
 
+.pin-icon.pinned {
+    transform: rotate(45deg);
+    color: #2196F3;
+}
+
+
+/* Анимация для dropdown */
+.dropdown-content {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: top center;
+    opacity: 0;
+    transform: scaleY(0);
+}
+
+.dropdown-content.show {
+    opacity: 1;
+    transform: scaleY(1);
+}
+
+/* Анимация для чекбоксов в dropdown */
+.dropdown-content label {
+    transition: all 0.2s ease;
+}
+
+.dropdown-content label:hover {
+    transform: translateX(5px);
+    background-color: rgba(33, 150, 243, 0.1);
+}
+
+/* Анимация для таймера */
+@keyframes timerPulse {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.pair-timer {
+    animation: timerPulse 2s infinite;
+}
+
+/* Анимация для значений */
+.value {
+    transition: all 0.3s ease;
+}
+
+.value:hover {
+    color: #2196F3;
+    transform: translateX(5px);
+}
+
+/* Анимация для обновления интервала */
+.update-interval {
+    transition: all 0.3s ease;
+}
+
+.update-interval:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Общие стили для кнопок */
+.filter-btn,
+.add-pair-btn,
+.view-btn,
+.update-interval {
+    position: relative;
+    background: white;
+    border: 2px solid #333;
+    border-radius: 10px;
+    transition: all 0.1s ease;
+    top: 0;
+    left: 0;
+    cursor: pointer;
+}
+
+/* Эффект мультяшного объема при наведении */
+.filter-btn:hover,
+.add-pair-btn:hover,
+.view-btn:hover,
+.update-interval:hover {
+    top: -4px;
+    left: -4px;
+    box-shadow: 4px 4px 0 #333;
+}
+
+/* Эффект нажатия */
+.filter-btn:active,
+.add-pair-btn:active,
+.view-btn:active,
+.update-interval:active {
+    top: 0;
+    left: 0;
+    box-shadow: 0 0 0 #333;
+}
+
+/* Тот же эффект для карточек */
 .pair-item {
-    order: 0;
-    transition: order 0.3s ease;
+    position: relative;
+    top: 0;
+    left: 0;
+    transition: all 0.1s ease;
+}
+
+.pair-item:hover {
+    top: -4px;
+    left: -4px;
+    box-shadow: 4px 4px 0 #333;
+    transform: none;
+}
+
+.pair-item:active {
+    top: 0;
+    left: 0;
+    box-shadow: 0 0 0 #333;
 }
