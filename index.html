@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CEX-CEX Scanner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <section class="filters-section">
+            <h2><span class="material-icons">filter_alt</span>Фильтры</h2>
+            <div class="filters">
+                <button class="filter-btn" id="buyExchanges">
+                    <span>Покупка</span>
+                    <span class="material-icons">expand_more</span>
+                </button>
+                <div class="dropdown-content" id="buyExchangesList">
+                    <label><input type="checkbox"> Binance</label><br>
+                    <label><input type="checkbox"> Kraken</label><br>
+                    <label><input type="checkbox"> KuCoin</label>
+                </div>
+
+                <button class="filter-btn" id="sellExchanges">
+                    <span>Продажа</span>
+                    <span class="material-icons">expand_more</span>
+                </button>
+                <div class="dropdown-content" id="sellExchangesList">
+                    <label><input type="checkbox"> Binance</label><br>
+                    <label><input type="checkbox"> Kraken</label><br>
+                    <label><input type="checkbox"> KuCoin</label>
+                </div>
+
+                <select class="update-interval">
+                    <option value="1">1с</option>
+                    <option value="5">5с</option>
+                    <option value="10">10с</option>
+                    <option value="15">15с</option>
+                    <option value="30">30с</option>
+                    <option value="45">45с</option>
+                    <option value="60">60с</option>
+                    <option value="0">Не обновлять</option>
+                </select>
+            </div>
+        </section>
+
+        <div class="view-toggle">
+            <button class="view-btn active" data-view="list">
+                <span class="material-icons">view_list</span>
+            </button>
+            <button class="view-btn" data-view="grid">
+                <span class="material-icons">grid_view</span>
+            </button>
+        </div>
+
+        <section class="pairs-section">
+            <h2><span class="material-icons">currency_exchange</span>Торговые пары</h2>
+            <div class="pairs-container" id="pairsContainer">
+                <!-- Pairs will be added here -->
+            </div>
+        </section>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
