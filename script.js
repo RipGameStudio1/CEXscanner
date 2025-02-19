@@ -1,3 +1,4 @@
+
 document.addEventListener('DOMContentLoaded', function() {
     const addPairBtn = document.getElementById('addPairBtn');
     const buyExchangesBtn = document.getElementById('buyExchanges');
@@ -6,7 +7,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const sellExchangesList = document.getElementById('sellExchangesList');
     const pairsContainer = document.getElementById('pairsContainer');
     const viewButtons = document.querySelectorAll('.view-btn');
-
+    window.addEventListener('load', checkViewMode);
+    window.addEventListener('resize', checkViewMode);
+	
+    function checkViewMode() {
+    if (window.innerWidth <= 600) {
+        pairsContainer.className = 'pairs-container grid';
+        viewButtons.forEach(btn => {
+            if (btn.dataset.view === 'grid') {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+         });
+       }
+    }
     // Получение никнейма из Telegram WebApp
     if (window.Telegram && window.Telegram.WebApp) {
         const username = window.Telegram.WebApp.initDataUnsafe.user?.username;
@@ -87,23 +102,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Функция создания карточки
     function createPairItem() {
-        const pairItem = document.createElement('div');
-        const pairId = 'pair_' + Date.now(); // Создаем уникальный ID
-        pairItem.className = 'pair-item';
-        pairItem.dataset.id = pairId;
-        pairItem.innerHTML = `
-            <div class="exchanges">
-                <div class="buy-exchange">
-                    <span class="exchange-name">Binance</span>
-                    <span class="exchange-price">$50,000</span>
-                </div>
-                <div class="sell-exchange">
-                    <span class="exchange-name">Kraken</span>
-                    <span class="exchange-price">$49,800</span>
-                </div>
+    const pairItem = document.createElement('div');
+    const pairId = 'pair_' + Date.now();
+    pairItem.className = 'pair-item';
+    pairItem.dataset.id = pairId;
+    pairItem.innerHTML = `
+        <div class="exchanges">
+            <div class="buy-exchange">
+                <span class="exchange-name">Binance</span>
+                <span class="exchange-price">$50,000</span>
             </div>
-            <div class="pair-details">
-                <div class="pair-info">
+            <div class="sell-exchange">
+                <span class="exchange-name">Kraken</span>
+                <span class="exchange-price">$49,800</span>
+            </div>
+        </div>
+        <div class="pair-details">
+            <div class="pair-info">
+                <div class="pair-network-group">
                     <div class="info-item">
                         <span class="label">Пара</span>
                         <span class="value">BTC/USDT</span>
@@ -112,29 +128,30 @@ document.addEventListener('DOMContentLoaded', function() {
                         <span class="label">Сеть</span>
                         <span class="value">BTC</span>
                     </div>
-                    <div class="info-item">
-                        <span class="label">Спред</span>
-                        <span class="value">0.4%</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="label">Комиссия</span>
-                        <span class="value">0.001 BTC</span>
-                    </div>
-                    <div class="info-item price-sell">
-                        <span class="label">Цена продажи</span>
-                        <span class="value">$49,800</span>
-                    </div>
-                    <div class="info-item price-buy">
-                        <span class="label">Цена покупки</span>
-                        <span class="value">$50,000</span>
-                    </div>
                 </div>
-                <div class="bottom-info">
-                    <span class="pair-timer">15с</span>
-                    <span class="material-icons pin-icon">push_pin</span>
+                <div class="info-item">
+                    <span class="label">Спред</span>
+                    <span class="value">0.4%</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Комиссия</span>
+                    <span class="value">0.001 BTC</span>
+                </div>
+                <div class="info-item price-buy">
+                    <span class="label">Цена покупки</span>
+                    <span class="value">$50,000</span>
+                </div>
+                <div class="info-item price-sell">
+                    <span class="label">Цена продажи</span>
+                    <span class="value">$49,800</span>
                 </div>
             </div>
-        `;
+            <div class="bottom-info">
+                <span class="pair-timer">15с</span>
+                <span class="material-icons pin-icon">push_pin</span>
+            </div>
+        </div>
+    `;
 
         // Добавляем обработчик для кнопки закрепления
         const pinIcon = pairItem.querySelector('.pin-icon');
