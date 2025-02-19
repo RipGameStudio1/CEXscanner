@@ -4,16 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CEX-CEX Scanner</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?ver=2">
 </head>
 <body>
     <div class="container">
         <section class="filters-section">
-            <h2><span class="material-icons">filter_alt</span>Фильтры</h2>
+            <div class="header-content">
+                <h2><span class="material-icons">filter_alt</span>Фильтры</h2>
+                <span class="username">@username</span>
+            </div>
             <div class="filters">
                 <div>
                     <button class="filter-btn" id="buyExchanges">
@@ -57,10 +61,12 @@
                 </select>
             </div>
         </section>
-	<button id="addPairBtn" class="add-pair-btn">
-    <span class="material-icons">add</span>
-    Добавить пару
-</button>
+
+        <button id="addPairBtn" class="add-pair-btn">
+            <span class="material-icons">add</span>
+            Добавить пару
+        </button>
+
         <div class="view-toggle">
             <button class="view-btn active" data-view="list">
                 <span class="material-icons">view_list</span>
@@ -73,46 +79,10 @@
         <section class="pairs-section">
             <h2><span class="material-icons">currency_exchange</span>Торговые пары</h2>
             <div class="pairs-container" id="pairsContainer">
-                <!-- Пример карточки для режима сетки -->
-                <div class="pair-item">
-                    <div class="exchanges">
-                        <div class="buy-exchange">
-                            <span class="exchange-name">Binance</span>
-                            <span class="exchange-price">$50,000</span>
-                        </div>
-                        <div class="sell-exchange">
-                            <span class="exchange-name">Kraken</span>
-                            <span class="exchange-price">$49,800</span>
-                        </div>
-                    </div>
-                    <div class="pair-details">
-                        <div class="pair-info">
-                            <div class="info-item">
-                                <span class="label">Пара</span>
-                                <span class="value">BTC/USDT</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="label">Сеть</span>
-                                <span class="value">BTC</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="label">Спред</span>
-                                <span class="value">0.4%</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="label">Комиссия</span>
-                                <span class="value">0.001 BTC</span>
-                            </div>
-                        </div>
-                        <div class="bottom-info">
-                            <span class="pair-timer">15с</span>
-                            <span class="material-icons pin-icon">push_pin</span>
-                        </div>
-                    </div>
-                </div>
+                <!-- Пары будут добавляться через JavaScript -->
             </div>
         </section>
     </div>
-    <script src="script.js"></script>
+    <script src="script.js?v2"></script>
 </body>
 </html>
