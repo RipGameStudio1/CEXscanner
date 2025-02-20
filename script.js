@@ -2,16 +2,15 @@
 const API_URL = 'https://underground-mia-slimeapp-847f161d.koyeb.app';
 // Функция форматирования оставшегося времени
 function formatTimeRemaining(expiresAt) {
-    // Добавляем отладочный вывод
-    console.log('Raw expiresAt:', expiresAt);
-    
     if (!expiresAt) return 'не указано';
     
     try {
-        const now = new Date();
-        const expires = new Date(expiresAt);
+        // Извлекаем значение даты из объекта MongoDB
+        const dateStr = expiresAt.$date || expiresAt;
         
-        // Проверяем валидность даты
+        const now = new Date();
+        const expires = new Date(dateStr);
+        
         if (isNaN(expires.getTime())) {
             console.error('Invalid date:', expiresAt);
             return 'ошибка даты';
@@ -120,9 +119,6 @@ const api = {
 function updateLicenseStatus(license) {
     const licenseStatusElement = document.querySelector('.license-status');
     if (!licenseStatusElement || !license) return;
-
-    // Добавляем отладочный вывод
-    console.log('License data:', license);
     
     const now = new Date();
     const expiresAt = license.expires_at;
