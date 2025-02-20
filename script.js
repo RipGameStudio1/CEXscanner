@@ -301,7 +301,9 @@ async function updatePairs() {
 
         pairsContainer.innerHTML = '<div class="loading">Загрузка пар...</div>';
         
+        // Получаем данные о парах
         const pairsData = await api.getPairs(currentUser.telegram_id);
+        console.log('Received pairs data:', pairsData); // Отладочный вывод
 
         // Получаем текущие фильтры
         const filters = {
@@ -312,64 +314,66 @@ async function updatePairs() {
             sell_exchanges: Array.from(sellExchangesList.querySelectorAll('input:checked'))
                 .map(cb => cb.value)
         };
+        console.log('Active filters:', filters); // Отладочный вывод
 
         pairsContainer.innerHTML = '';
 
         // Обработка закрепленных пар
         if (pairsData.pinned_pairs && pairsData.pinned_pairs.length > 0) {
-            const filteredPinnedPairs = pairsData.pinned_pairs.map(pinnedPair => {
+            console.log('Processing pinned pairs:', pairsData.pinned_pairs); // Отладочный вывод
+            
+            for (const pinnedPair of pairsData.pinned_pairs) {
                 // Находим соответствующую активную пару
-                const activePair = pairsData.active_pairs.find(
-                    ap => (ap._id.$oid || ap._id) === (pinnedPair.pair_id.$oid || pinnedPair.pair_id)
+                const activePair = pairsData.active_pairs.find(ap => 
+                    (ap._id.$oid || ap._id) === (pinnedPair.pair_id.$oid || pinnedPair.pair_id)
                 );
+
                 if (activePair) {
-                    return {
+                    const mergedPair = {
                         ...activePair,
                         is_pinned: true,
                         is_active: pinnedPair.is_active
                     };
-                }
-                return null;
-            }).filter(pair => pair !== null);
 
-            // Применяем фильтры к закрепленным парам
-            const filteredAndPinnedPairs = filterPairs(filteredPinnedPairs, filters);
-            filteredAndPinnedPairs.forEach(pair => {
-                const pairElement = createPairItem(pair);
-                if (!pair.is_active) {
-                    pairElement.classList.add('inactive');
+                    // Применяем фильтры к закрепленной паре
+                    if (filterPairs([mergedPair], filters).length > 0) {
+                        const pairElement = createPairItem(mergedPair);
+                        if (!pinnedPair.is_active) {
+                            pairElement.classList.add('inactive');
+                        }
+                        pairsContainer.appendChild(pairElement);
+                    }
                 }
-                pairsContainer.appendChild(pairElement);
-            });
+            }
         }
 
         // Обработка активных пар
         if (pairsData.active_pairs && pairsData.active_pairs.length > 0) {
+            console.log('Processing active pairs:', pairsData.active_pairs.length); // Отладочный вывод
+            
             // Создаем множество ID закрепленных пар
             const pinnedPairIds = new Set(
                 pairsData.pinned_pairs?.map(pp => pp.pair_id.$oid || pp.pair_id) || []
             );
 
-            // Фильтруем активные пары, исключая закрепленные
+            // Фильтруем и отображаем активные пары
             const activePairsToShow = pairsData.active_pairs.filter(pair => 
                 !pinnedPairIds.has(pair._id.$oid || pair._id)
             );
 
-            // Применяем фильтры к оставшимся активным парам
             const filteredActivePairs = filterPairs(activePairsToShow, filters);
+            console.log('Filtered active pairs:', filteredActivePairs.length); // Отладочный вывод
 
-            // Добавляем отфильтрованные активные пары
             filteredActivePairs.forEach(pair => {
                 const pairElement = createPairItem({
                     ...pair,
-                    is_pinned: false,
-                    is_active: true
+                    is_pinned: false
                 });
                 pairsContainer.appendChild(pairElement);
             });
         }
 
-        // Если нет пар для отображения
+        // Показываем сообщение, если нет пар для отображения
         if (pairsContainer.children.length === 0) {
             const noResultsMessage = document.createElement('div');
             noResultsMessage.className = 'no-pairs';
