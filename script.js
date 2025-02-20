@@ -1,6 +1,64 @@
 
 const API_URL = 'https://underground-mia-slimeapp-847f161d.koyeb.app';
 
+function stopPairTimer(pairItem) {
+    const timerId = pairItem.dataset.timerId;
+    if (timerId) {
+        clearInterval(timerId);
+        delete pairItem.dataset.timerId;
+    }
+}
+
+function clearAllTimers() {
+    const pairItems = document.querySelectorAll('.pair-item');
+    pairItems.forEach(stopPairTimer);
+}
+
+function startPairTimer(pairItem) {
+    const timerElement = pairItem.querySelector('.pair-timer');
+    if (!timerElement || !pairItem.dataset.aliveTime) return;
+
+    const startTime = new Date(pairItem.dataset.aliveTime);
+
+    function updateTimer() {
+        const now = new Date();
+        const diff = Math.floor((now - startTime) / 1000);
+
+        let timerText;
+        if (diff < 60) {
+            // Только секунды
+            timerText = `${diff}с`;
+        } else if (diff < 3600) {
+            // Минуты и секунды
+            const minutes = Math.floor(diff / 60);
+            const seconds = diff % 60;
+            timerText = `${minutes}м ${seconds}с`;
+        } else if (diff < 86400) {
+            // Часы, минуты и секунды
+            const hours = Math.floor(diff / 3600);
+            const minutes = Math.floor((diff % 3600) / 60);
+            const seconds = diff % 60;
+            timerText = `${hours}ч ${minutes}м ${seconds}с`;
+        } else {
+            // Дни, часы, минуты и секунды
+            const days = Math.floor(diff / 86400);
+            const hours = Math.floor((diff % 86400) / 3600);
+            const minutes = Math.floor((diff % 3600) / 60);
+            const seconds = diff % 60;
+            timerText = `${days}д ${hours}ч ${minutes}м ${seconds}с`;
+        }
+
+        timerElement.textContent = timerText;
+    }
+
+    // Запускаем обновление каждую секунду
+    const timerId = setInterval(updateTimer, 1000);
+    updateTimer(); // Первое обновление сразу
+
+    // Сохраняем ID таймера в dataset элемента
+    pairItem.dataset.timerId = timerId;
+}
+
 function updatePairTimer(pairItem, timerElement) {
     const aliveTime = pairItem.dataset.aliveTime;
     if (!aliveTime) return;
@@ -241,7 +299,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     const updateIntervalBtn = document.getElementById('updateInterval');
     const intervalList = document.getElementById('intervalList');
 
-    
+    async function updatePairsWithTimerCleanup() {
+        clearAllTimers();
+        await updatePairs();
+    }
     // Проверка режима просмотра
     function checkViewMode() {
         if (window.innerWidth <= 601) {
@@ -532,7 +593,7 @@ async function updatePairs() {
             }
         });
 	const timerElement = pairItem.querySelector('.pair-timer');
-    	updatePairTimer(pairItem, timerElement);
+    	startPairTimer(pairItem);
         return pairItem;
     }
     // Обработчики событий
@@ -574,7 +635,7 @@ async function updatePairs() {
             }
 
             if (value > 0) {
-                updateInterval = setInterval(updatePairs, value * 1000);
+                updateInterval = setInterval(updatePairsWithTimerCleanup, value * 1000);
             }
 
             if (currentUser) {
@@ -670,7 +731,7 @@ async function updatePairs() {
             updateIntervalBtn.querySelector('span:first-child').textContent = text;
 
             if (value > 0) {
-                updateInterval = setInterval(updatePairs, value * 1000);
+                updateInterval = setInterval(updatePairsWithTimerCleanup, value * 1000);
             }
         }
 
