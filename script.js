@@ -1,6 +1,21 @@
 
 const API_URL = 'https://underground-mia-slimeapp-847f161d.koyeb.app';
+// Функция форматирования оставшегося времени
+function formatTimeRemaining(expiresAt) {
+    const now = new Date();
+    const expires = new Date(expiresAt);
+    const diff = expires - now;
 
+    if (diff <= 0) return 'Лицензия истекла';
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+    if (days > 0) {
+        return `${days}д ${hours}ч`;
+    }
+    return `${hours}ч`;
+}
 // Функции для работы с API
 const api = {
     async getUserLicense(telegramId) {
@@ -315,22 +330,7 @@ async function updatePairs() {
         selectAllCheckbox.checked = checkboxes.length === checkedBoxes.length;
         selectAllCheckbox.indeterminate = checkedBoxes.length > 0 && checkboxes.length !== checkedBoxes.length;
     }
-    // Функция форматирования оставшегося времени
-function formatTimeRemaining(expiresAt) {
-    const now = new Date();
-    const expires = new Date(expiresAt);
-    const diff = expires - now;
-
-    if (diff <= 0) return 'Лицензия истекла';
-
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-
-    if (days > 0) {
-        return `${days}д ${hours}ч`;
-    }
-    return `${hours}ч`;
-}
+    
 
     // Создание карточки пары
     function createPairItem(pairData) {
