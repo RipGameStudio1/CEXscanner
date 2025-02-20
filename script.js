@@ -292,13 +292,15 @@ async function updatePairs() {
         pairsContainer.innerHTML = '';
 
         if (currentUser && pairsData.pinned_pairs) {
-            // Фильтруем и добавляем закрепленные пары
             const filteredPinnedPairs = filterPairs(pairsData.pinned_pairs, filters);
             filteredPinnedPairs.forEach(pair => {
                 const pairElement = createPairItem(pair);
                 if (!pair.is_active) {
                     pairElement.classList.add('inactive');
                 }
+                // Отмечаем пару как закрепленную
+                const pinIcon = pairElement.querySelector('.pin-icon');
+                pinIcon.classList.add('pinned');
                 pairsContainer.appendChild(pairElement);
             });
         }
@@ -355,7 +357,9 @@ async function updatePairs() {
     function createPairItem(pairData) {
         const pairItem = document.createElement('div');
         pairItem.className = 'pair-item new';
-        pairItem.dataset.id = pairData._id;
+
+	const pairId = pairData._id.$oid || pairData._id; // добавляем проверку на $oid
+    	pairItem.dataset.id = pairId;
 
         pairItem.innerHTML = `
             <div class="exchanges">
@@ -412,11 +416,11 @@ async function updatePairs() {
             const isPinned = pinIcon.classList.contains('pinned');
             try {
                 if (isPinned) {
-                    await api.unpinPair(pairData._id, currentUser.telegram_id);
+                    await api.unpinPair(pairId, currentUser.telegram_id);
                     pinIcon.classList.remove('pinned');
                     pinIcon.style.color = '#666';
                 } else {
-                    await api.pinPair(pairData._id, currentUser.telegram_id);
+                    await api.pinPair(pairId, currentUser.telegram_id);
                     pinIcon.classList.add('pinned');
                     pinIcon.style.color = '#2196F3';
                 }
@@ -425,11 +429,6 @@ async function updatePairs() {
                 console.error('Error toggling pin:', error);
             }
         });
-
-        setTimeout(() => {
-            pairItem.classList.remove('new');
-        }, 500);
-
         return pairItem;
     }
 
