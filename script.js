@@ -160,13 +160,7 @@ async function checkLicenseStatus(telegramId) {
 }
 // Функция фильтрации пар
 function filterPairs(pairs, filters) {
-    console.log('Filtering pairs:', pairs, 'with filters:', filters); // добавим лог входных данных
     return pairs.filter(pair => {
-        // Если пара не содержит необходимых данных, пропускаем её
-        if (!pair.coin_pair) {
-            return true;
-        }
-
         // Фильтр по монетам
         if (filters.selected_coins.length > 0) {
             const pairCoin = pair.coin_pair.split('/')[0];
@@ -176,13 +170,11 @@ function filterPairs(pairs, filters) {
         }
 
         // Фильтр по бирже покупки
-        // Если фильтр бирж покупки активен, проверяем соответствие
         if (filters.buy_exchanges.length > 0 && !filters.buy_exchanges.includes(pair.buy_exchange)) {
             return false;
         }
 
         // Фильтр по бирже продажи
-        // Если фильтр бирж продажи активен, проверяем соответствие
         if (filters.sell_exchanges.length > 0 && !filters.sell_exchanges.includes(pair.sell_exchange)) {
             return false;
         }
@@ -316,61 +308,39 @@ async function updatePairs() {
 
         pairsContainer.innerHTML = '';
 
-        // Обработка закрепленных пар
-        if (pairsData.pinned_pairs && pairsData.pinned_pairs.length > 0) {
-            console.log('Processing pinned pairs:', pairsData.pinned_pairs);
-            
-            pairsData.pinned_pairs.forEach(pinnedPair => {
-                // Находим соответствующую активную пару
-                const activePair = pairsData.active_pairs?.find(ap => 
-                    (ap._id.$oid || ap._id) === (pinnedPair.pair_id.$oid || pinnedPair.pair_id)
-                );
-
-                if (activePair) {
-                    const mergedPair = {
-                        ...activePair,
-                        is_pinned: true,
-                        is_active: pinnedPair.is_active
-                    };
-
-                    // Применяем фильтры к закрепленной паре
-                    if (filterPairs([mergedPair], filters).length > 0) {
-                        const pairElement = createPairItem(mergedPair);
-                        if (!pinnedPair.is_active) {
-                            pairElement.classList.add('inactive');
-                        }
-                        pairsContainer.appendChild(pairElement);
-                    }
-                }
+        // Создаем Map закрепленных пар для быстрого поиска
+        const pinnedPairsMap = new Map();
+        if (pairsData.pinned_pairs) {
+            pairsData.pinned_pairs.forEach(pp => {
+                const id = pp.pair_id.$oid || pp.pair_id;
+                pinnedPairsMap.set(id, pp);
             });
         }
 
-        // Обработка активных пар
+        // Обрабатываем все активные пары
         if (pairsData.active_pairs && pairsData.active_pairs.length > 0) {
-            console.log('Processing active pairs:', pairsData.active_pairs.length);
+            const filteredPairs = filterPairs(pairsData.active_pairs, filters);
             
-            // Создаем множество ID закрепленных пар
-            const pinnedPairIds = new Set(
-                pairsData.pinned_pairs?.map(pp => pp.pair_id.$oid || pp.pair_id) || []
-            );
-
-            // Фильтруем активные пары, исключая закрепленные
-            const activePairsToShow = pairsData.active_pairs.filter(pair => 
-                !pinnedPairIds.has(pair._id.$oid || pair._id)
-            );
-
-            // Применяем фильтры к оставшимся активным парам
-            const filteredActivePairs = filterPairs(activePairsToShow, filters);
-            console.log('Filtered active pairs:', filteredActivePairs.length);
-
-            // Добавляем отфильтрованные активные пары
-            filteredActivePairs.forEach(pair => {
+            filteredPairs.forEach(pair => {
+                const pairId = pair._id.$oid || pair._id;
+                const pinnedInfo = pinnedPairsMap.get(pairId);
+                
                 const pairElement = createPairItem({
                     ...pair,
-                    is_pinned: false,
-                    is_active: true
+                    is_pinned: !!pinnedInfo,
+                    is_active: pinnedInfo ? pinnedInfo.is_active : true
                 });
-                pairsContainer.appendChild(pairElement);
+
+                if (pinnedInfo && !pinnedInfo.is_active) {
+                    pairElement.classList.add('inactive');
+                }
+
+                // Закрепленные пары добавляем в начало, остальные - в конец
+                if (pinnedInfo) {
+                    pairsContainer.insertBefore(pairElement, pairsContainer.firstChild);
+                } else {
+                    pairsContainer.appendChild(pairElement);
+                }
             });
         }
 
