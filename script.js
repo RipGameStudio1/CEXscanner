@@ -80,7 +80,36 @@ const api = {
         return await response.json();
     }
 };
+// Функция обновления статуса лицензии
+function updateLicenseStatus(license) {
+    const licenseStatusElement = document.querySelector('.license-status');
+    if (!licenseStatusElement || !license) return;
 
+    const now = new Date();
+    const expiresAt = new Date(license.expires_at);
+    
+    // Проверяем активность лицензии
+    if (!license.is_active || now > expiresAt) {
+        licenseStatusElement.textContent = 'Лицензия неактивна';
+        return;
+    }
+
+    // Вычисляем оставшееся время и отображаем статус
+    const timeRemaining = formatTimeRemaining(license.expires_at);
+    licenseStatusElement.textContent = `${license.type} • ${timeRemaining}`;
+}
+
+// Периодическая проверка статуса лицензии
+async function checkLicenseStatus(telegramId) {
+    try {
+        const response = await api.getUserLicense(telegramId);
+        if (response) {
+            updateLicenseStatus(response);
+        }
+    } catch (error) {
+        console.error('Error checking license status:', error);
+    }
+}
 // Функция фильтрации пар
 function filterPairs(pairs, filters) {
     return pairs.filter(pair => {
@@ -131,6 +160,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     const updateIntervalBtn = document.getElementById('updateInterval');
     const intervalList = document.getElementById('intervalList');
 
+    
     // Проверка режима просмотра
     function checkViewMode() {
         if (window.innerWidth <= 450) {
@@ -155,14 +185,17 @@ document.addEventListener('DOMContentLoaded', async function() {
         try {
             currentUser = await api.getUser(telegramUser.id);
             document.querySelector('.username').textContent = '@' + telegramUser.username;
+            
+            // Обновляем статус лицензии
             updateLicenseStatus(currentUser.license);
 
-            // Обновляем статус лицензии каждую минуту
+            // Запускаем периодическую проверку лицензии
             setInterval(() => {
-                updateLicenseStatus(currentUser.license);
-            }, 60000);
+                checkLicenseStatus(telegramUser.id);
+            }, 60000); // Проверка каждую минуту
 
-        } catch {
+        } catch (error) {
+            console.error('Error initializing user:', error);
             currentUser = await api.createUser(telegramUser.id, telegramUser.username);
             updateLicenseStatus(currentUser.license);
         }
