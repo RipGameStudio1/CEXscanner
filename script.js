@@ -234,7 +234,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             // Добавим логи для отладки
             console.log('Telegram user data:', telegramUser);
             
-            currentUser = await api.getUser(telegramUser.id.toString()); // Преобразуем ID в строку
+            currentUser = await api.getUser(telegramUser.id.toString());
             document.querySelector('.username').textContent = '@' + telegramUser.username;
             updateLicenseStatus(currentUser.license);
 
@@ -244,16 +244,16 @@ document.addEventListener('DOMContentLoaded', async function() {
             }, 60000);
 
         } catch (error) {
-            console.log('Creating new user with ID:', telegramUser.id.toString());
-            try {
-                currentUser = await api.createUser(
-                    telegramUser.id.toString(), 
-                    telegramUser.username || 'unknown'
-                );
-                updateLicenseStatus(currentUser.license);
-            } catch (createError) {
-                console.error('Error creating user:', createError);
-            }
+            // Получаем username, используя first_name если username не доступен
+            const username = telegramUser.username || telegramUser.first_name || 'unknown';
+            console.log('Creating new user:', {
+                id: telegramUser.id.toString(),
+                username: username
+            });
+
+            currentUser = await api.createUser(telegramUser.id.toString(), username);
+            document.querySelector('.username').textContent = '@' + username;
+            updateLicenseStatus(currentUser.license);
         }
     }
 }
