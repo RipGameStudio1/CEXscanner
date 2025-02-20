@@ -808,10 +808,26 @@ body {
 .pairs-section h2 {
     display: flex;
     align-items: center;
+    justify-content: space-between; /* Распределяем элементы по краям */
     gap: 10px;
     margin: 20px 0;
 }
-
 .pairs-section h2 .material-icons {
     font-size: 24px;
+}
+
+.pairs-section h2 .header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Стили для view-toggle внутри заголовка */
+.pairs-section h2 .view-toggle {
+    margin-bottom: 0; /* Убираем нижний отступ */
+}
+
+.pairs-section h2 .view-toggle .view-btn {
+    width: 35px; /* Немного уменьшаем размер кнопок */
+    height: 35px;
 }
