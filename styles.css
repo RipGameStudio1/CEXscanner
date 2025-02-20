@@ -852,3 +852,14 @@ body {
     transition: all 0.1s ease;
 }
 
+#addPairBtn:hover {
+    top: -4px;
+    left: -4px;
+    box-shadow: 4px 4px 0 #333;
+}
+
+#addPairBtn:active {
+    top: 0;
+    left: 0;
+    box-shadow: 0 0 0 #333;
+}
