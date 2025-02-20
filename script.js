@@ -2,24 +2,39 @@
 const API_URL = 'https://underground-mia-slimeapp-847f161d.koyeb.app';
 // Функция форматирования оставшегося времени
 function formatTimeRemaining(expiresAt) {
+    // Добавляем отладочный вывод
+    console.log('Raw expiresAt:', expiresAt);
+    
     if (!expiresAt) return 'не указано';
     
-    const now = new Date();
-    const expires = new Date(expiresAt);
-    const diff = expires - now;
+    try {
+        const now = new Date();
+        const expires = new Date(expiresAt);
+        
+        // Проверяем валидность даты
+        if (isNaN(expires.getTime())) {
+            console.error('Invalid date:', expiresAt);
+            return 'ошибка даты';
+        }
+        
+        const diff = expires - now;
 
-    if (diff <= 0) return 'Free';
+        if (diff <= 0) return 'истекла';
 
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
-    if (days > 0) {
-        return `${days}д ${hours}ч`;
-    } else if (hours > 0) {
-        return `${hours}ч ${minutes}м`;
-    } else {
-        return `${minutes}м`;
+        if (days > 0) {
+            return `${days}д ${hours}ч`;
+        } else if (hours > 0) {
+            return `${hours}ч ${minutes}м`;
+        } else {
+            return `${minutes}м`;
+        }
+    } catch (error) {
+        console.error('Error formatting time:', error);
+        return 'ошибка';
     }
 }
 // Функции для работы с API
@@ -106,20 +121,22 @@ function updateLicenseStatus(license) {
     const licenseStatusElement = document.querySelector('.license-status');
     if (!licenseStatusElement || !license) return;
 
+    // Добавляем отладочный вывод
+    console.log('License data:', license);
+    
     const now = new Date();
-    const expiresAt = new Date(license.expires_at);
+    const expiresAt = license.expires_at;
     
     // Проверяем активность лицензии
-    if (!license.is_active || now > expiresAt) {
-        licenseStatusElement.innerHTML = `${license.type}<br>Free`;
+    if (!license.is_active || !expiresAt) {
+        licenseStatusElement.innerHTML = `${license.type}<br>неактивна`;
         return;
     }
 
     // Вычисляем оставшееся время и отображаем статус
-    const timeRemaining = formatTimeRemaining(license.expires_at);
+    const timeRemaining = formatTimeRemaining(expiresAt);
     licenseStatusElement.innerHTML = `${license.type}<br>${timeRemaining}`;
 }
-
 // Периодическая проверка статуса лицензии
 async function checkLicenseStatus(telegramId) {
     try {
