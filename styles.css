@@ -839,6 +839,7 @@ body {
 }
 
 #addPairBtn {
+    position: relative;
     background: white;
     border: 2px solid #333;
     border-radius: 10px;
@@ -862,4 +863,15 @@ body {
     top: 0;
     left: 0;
     box-shadow: 0 0 0 #333;
+    transform: translateY(0); /* Убираем трансформацию */
+}
+
+#addPairBtn .material-icons {
+    position: relative; /* Добавляем это свойство */
+    z-index: 1; /* Добавляем z-index */
+}
+
+/* Убедитесь, что иконка всегда видна */
+#addPairBtn:active .material-icons {
+    display: block;
 }
