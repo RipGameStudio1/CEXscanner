@@ -9,14 +9,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?ver=6">
+    <link rel="stylesheet" href="styles.css?ver=5">
 </head>
 <body>
     <div class="container">
         <section class="filters-section">
             <div class="header-content">
                 <h2><span class="material-icons">filter_alt</span>Фильтры</h2>
-		<span class="license-status" style="color: #999;"></span>
+                <span class="license-status" style="color: #999;"></span>
                 <span class="username">@username</span>
             </div>
             <div class="filters">
@@ -96,17 +96,21 @@
             Добавить пару
         </button>
 
-        <div class="view-toggle">
-            <button class="view-btn active" data-view="list">
-                <span class="material-icons">view_list</span>
-            </button>
-            <button class="view-btn" data-view="grid">
-                <span class="material-icons">grid_view</span>
-            </button>
-        </div>
-
         <section class="pairs-section">
-            <h2><span class="material-icons">currency_exchange</span>Торговые пары</h2>
+            <h2>
+                <div class="header-left">
+                    <span class="material-icons">currency_exchange</span>
+                    Торговые пары
+                </div>
+                <div class="view-toggle">
+                    <button class="view-btn active" data-view="list">
+                        <span class="material-icons">view_list</span>
+                    </button>
+                    <button class="view-btn" data-view="grid">
+                        <span class="material-icons">grid_view</span>
+                    </button>
+                </div>
+            </h2>
             <div class="pairs-container" id="pairsContainer">
                 <!-- Пары будут добавляться через JavaScript -->
             </div>
