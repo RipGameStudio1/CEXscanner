@@ -244,7 +244,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     // Проверка режима просмотра
     function checkViewMode() {
-        if (window.innerWidth <= 450) {
+        if (window.innerWidth <= 601) {
             pairsContainer.className = 'pairs-container grid';
             viewButtons.forEach(btn => {
                 if (btn.dataset.view === 'grid') {
