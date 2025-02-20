@@ -147,6 +147,13 @@ async function checkLicenseStatus(telegramId) {
 // Функция фильтрации пар
 function filterPairs(pairs, filters) {
     return pairs.filter(pair => {
+        // Для закрепленных пар нужно проверить наличие всех необходимых полей
+        if (!pair.coin_pair) {
+            // Если это закрепленная пара, возможно нужно получить данные из другого поля
+            // или пропустить фильтрацию
+            return true;
+        }
+
         // Фильтр по монетам
         if (filters.selected_coins.length > 0) {
             const pairCoin = pair.coin_pair.split('/')[0];
@@ -157,14 +164,14 @@ function filterPairs(pairs, filters) {
 
         // Фильтр по бирже покупки
         if (filters.buy_exchanges.length > 0) {
-            if (!filters.buy_exchanges.includes(pair.buy_exchange)) {
+            if (!filters.buy_exchange || !filters.buy_exchanges.includes(pair.buy_exchange)) {
                 return false;
             }
         }
 
         // Фильтр по бирже продажи
         if (filters.sell_exchanges.length > 0) {
-            if (!filters.sell_exchanges.includes(pair.sell_exchange)) {
+            if (!filters.sell_exchange || !filters.sell_exchanges.includes(pair.sell_exchange)) {
                 return false;
             }
         }
@@ -263,21 +270,20 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Функция обновления пар
 async function updatePairs() {
     try {
-	if (!currentUser) {
+        if (!currentUser) {
             pairsContainer.innerHTML = '<div class="no-pairs">Необходима авторизация через Telegram</div>';
             return;
         }
 
         // Проверяем тип лицензии
         if (currentUser.license.type === "Free") {
-            pairsContainer.innerHTML = '<div class="no-pairs">Что бы фунции работали - купите лицензию</div>';
+            pairsContainer.innerHTML = '<div class="no-pairs">Что бы функции работали - купите лицензию</div>';
             return;
         }
+
         pairsContainer.innerHTML = '<div class="loading">Загрузка пар...</div>';
         
-        const pairsData = currentUser 
-            ? await api.getPairs(currentUser.telegram_id)
-            : await api.getPairs();
+        const pairsData = await api.getPairs(currentUser.telegram_id);
 
         // Получаем текущие фильтры
         const filters = {
@@ -291,29 +297,40 @@ async function updatePairs() {
 
         pairsContainer.innerHTML = '';
 
-        if (currentUser && pairsData.pinned_pairs) {
-            const filteredPinnedPairs = filterPairs(pairsData.pinned_pairs, filters);
-            filteredPinnedPairs.forEach(pair => {
-                const pairElement = createPairItem(pair);
-                if (!pair.is_active) {
-                    pairElement.classList.add('inactive');
+        // Обработка закрепленных пар
+        if (pairsData.pinned_pairs && pairsData.pinned_pairs.length > 0) {
+            pairsData.pinned_pairs.forEach(pinnedPair => {
+                // Найти соответствующую активную пару
+                const activePair = pairsData.active_pairs.find(
+                    ap => ap._id.$oid === pinnedPair.pair_id.$oid
+                );
+                if (activePair) {
+                    const pairElement = createPairItem({
+                        ...activePair,
+                        is_pinned: true
+                    });
+                    if (!pinnedPair.is_active) {
+                        pairElement.classList.add('inactive');
+                    }
+                    pairsContainer.appendChild(pairElement);
                 }
-                // Отмечаем пару как закрепленную
-                const pinIcon = pairElement.querySelector('.pin-icon');
-                pinIcon.classList.add('pinned');
-                pairsContainer.appendChild(pairElement);
             });
         }
 
-        // Фильтруем и добавляем активные пары
-        const activePairs = currentUser ? pairsData.active_pairs : pairsData.active_pairs || [];
-        const filteredActivePairs = filterPairs(activePairs, filters);
-
+        // Обработка активных пар
+        const filteredActivePairs = filterPairs(pairsData.active_pairs || [], filters);
+        
         if (filteredActivePairs.length > 0) {
             filteredActivePairs.forEach(pair => {
-                pairsContainer.appendChild(createPairItem(pair));
+                // Проверяем, не является ли пара уже закрепленной
+                const isPinned = pairsData.pinned_pairs?.some(
+                    pp => pp.pair_id.$oid === pair._id.$oid
+                );
+                if (!isPinned) {
+                    pairsContainer.appendChild(createPairItem(pair));
+                }
             });
-        } else {
+        } else if (pairsContainer.children.length === 0) {
             const noResultsMessage = document.createElement('div');
             noResultsMessage.className = 'no-pairs';
             noResultsMessage.textContent = filters.selected_coins.length || 
