@@ -275,9 +275,9 @@ async function updatePairs() {
             return;
         }
 
-        // Проверяем тип лицензии
-        if (currentUser.license.type === "Free") {
-            pairsContainer.innerHTML = '<div class="no-pairs">Что бы функции работали - купите лицензию</div>';
+        // Проверяем наличие лицензии и её тип
+        if (!currentUser.license || currentUser.license.type === "Free") {
+            pairsContainer.innerHTML = '<div class="no-pairs">Чтобы функции работали - купите лицензию</div>';
             return;
         }
 
@@ -299,47 +299,70 @@ async function updatePairs() {
 
         // Обработка закрепленных пар
         if (pairsData.pinned_pairs && pairsData.pinned_pairs.length > 0) {
-            pairsData.pinned_pairs.forEach(pinnedPair => {
-                // Найти соответствующую активную пару
+            const filteredPinnedPairs = pairsData.pinned_pairs.map(pinnedPair => {
+                // Находим соответствующую активную пару
                 const activePair = pairsData.active_pairs.find(
-                    ap => ap._id.$oid === pinnedPair.pair_id.$oid
+                    ap => (ap._id.$oid || ap._id) === (pinnedPair.pair_id.$oid || pinnedPair.pair_id)
                 );
                 if (activePair) {
-                    const pairElement = createPairItem({
+                    return {
                         ...activePair,
-                        is_pinned: true
-                    });
-                    if (!pinnedPair.is_active) {
-                        pairElement.classList.add('inactive');
-                    }
-                    pairsContainer.appendChild(pairElement);
+                        is_pinned: true,
+                        is_active: pinnedPair.is_active
+                    };
                 }
+                return null;
+            }).filter(pair => pair !== null);
+
+            // Применяем фильтры к закрепленным парам
+            const filteredAndPinnedPairs = filterPairs(filteredPinnedPairs, filters);
+            filteredAndPinnedPairs.forEach(pair => {
+                const pairElement = createPairItem(pair);
+                if (!pair.is_active) {
+                    pairElement.classList.add('inactive');
+                }
+                pairsContainer.appendChild(pairElement);
             });
         }
 
         // Обработка активных пар
-        const filteredActivePairs = filterPairs(pairsData.active_pairs || [], filters);
-        
-        if (filteredActivePairs.length > 0) {
+        if (pairsData.active_pairs && pairsData.active_pairs.length > 0) {
+            // Создаем множество ID закрепленных пар
+            const pinnedPairIds = new Set(
+                pairsData.pinned_pairs?.map(pp => pp.pair_id.$oid || pp.pair_id) || []
+            );
+
+            // Фильтруем активные пары, исключая закрепленные
+            const activePairsToShow = pairsData.active_pairs.filter(pair => 
+                !pinnedPairIds.has(pair._id.$oid || pair._id)
+            );
+
+            // Применяем фильтры к оставшимся активным парам
+            const filteredActivePairs = filterPairs(activePairsToShow, filters);
+
+            // Добавляем отфильтрованные активные пары
             filteredActivePairs.forEach(pair => {
-                // Проверяем, не является ли пара уже закрепленной
-                const isPinned = pairsData.pinned_pairs?.some(
-                    pp => pp.pair_id.$oid === pair._id.$oid
-                );
-                if (!isPinned) {
-                    pairsContainer.appendChild(createPairItem(pair));
-                }
+                const pairElement = createPairItem({
+                    ...pair,
+                    is_pinned: false,
+                    is_active: true
+                });
+                pairsContainer.appendChild(pairElement);
             });
-        } else if (pairsContainer.children.length === 0) {
+        }
+
+        // Если нет пар для отображения
+        if (pairsContainer.children.length === 0) {
             const noResultsMessage = document.createElement('div');
             noResultsMessage.className = 'no-pairs';
-            noResultsMessage.textContent = filters.selected_coins.length || 
-                                         filters.buy_exchanges.length || 
-                                         filters.sell_exchanges.length 
+            noResultsMessage.textContent = (filters.selected_coins.length > 0 || 
+                                          filters.buy_exchanges.length > 0 || 
+                                          filters.sell_exchanges.length > 0)
                 ? 'Нет пар, соответствующих выбранным фильтрам'
                 : 'Нет активных пар';
             pairsContainer.appendChild(noResultsMessage);
         }
+
     } catch (error) {
         console.error('Error updating pairs:', error);
         pairsContainer.innerHTML = '<div class="error-message">Ошибка загрузки пар</div>';
@@ -375,7 +398,7 @@ async function updatePairs() {
         const pairItem = document.createElement('div');
         pairItem.className = 'pair-item new';
 
-	const pairId = pairData._id.$oid || pairData._id; // добавляем проверку на $oid
+	const pairId = pairData._id.$oid || pairData.pair_id?.$oid || pairData._id;
     	pairItem.dataset.id = pairId;
 
         pairItem.innerHTML = `
@@ -427,11 +450,16 @@ async function updatePairs() {
 
         // Добавляем обработчик для кнопки закрепления
         const pinIcon = pairItem.querySelector('.pin-icon');
+	if (pairData.is_pinned) {
+       		pinIcon.classList.add('pinned');
+    	}
         pinIcon.addEventListener('click', async () => {
-            if (!currentUser) return;
-
+            e.stopPropagation(); // Предотвращаем всплытие события	
+	    if (!currentUser) return;
+	
             const isPinned = pinIcon.classList.contains('pinned');
             try {
+		const isPinned = pinIcon.classList.contains('pinned');
                 if (isPinned) {
                     await api.unpinPair(pairId, currentUser.telegram_id);
                     pinIcon.classList.remove('pinned');
@@ -441,7 +469,9 @@ async function updatePairs() {
                     pinIcon.classList.add('pinned');
                     pinIcon.style.color = '#2196F3';
                 }
-                await updatePairs();
+                setTimeout(() => {
+                    updatePairs();
+                }, 100);
             } catch (error) {
                 console.error('Error toggling pin:', error);
             }
