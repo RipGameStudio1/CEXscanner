@@ -294,7 +294,6 @@ async function updatePairs() {
             return;
         }
 
-        // Проверяем наличие лицензии и её тип
         if (!currentUser.license || currentUser.license.type === "Free") {
             pairsContainer.innerHTML = '<div class="no-pairs">Чтобы функции работали - купите лицензию</div>';
             return;
@@ -302,11 +301,9 @@ async function updatePairs() {
 
         pairsContainer.innerHTML = '<div class="loading">Загрузка пар...</div>';
         
-        // Получаем данные о парах
         const pairsData = await api.getPairs(currentUser.telegram_id);
-        console.log('Received pairs data:', pairsData); // Отладочный вывод
+        console.log('Received pairs data:', pairsData);
 
-        // Получаем текущие фильтры
         const filters = {
             selected_coins: Array.from(cryptoListContainer.querySelectorAll('input:checked'))
                 .map(cb => cb.value),
@@ -315,44 +312,83 @@ async function updatePairs() {
             sell_exchanges: Array.from(sellExchangesList.querySelectorAll('input:checked'))
                 .map(cb => cb.value)
         };
-        console.log('Active filters:', filters); // Отладочный вывод
+        console.log('Active filters:', filters);
 
         pairsContainer.innerHTML = '';
 
         // Обработка закрепленных пар
         if (pairsData.pinned_pairs && pairsData.pinned_pairs.length > 0) {
-    console.log('Processing pinned pairs:', pairsData.pinned_pairs);
-    console.log('Available active pairs:', pairsData.active_pairs); // добавим лог активных пар
-    
-    for (const pinnedPair of pairsData.pinned_pairs) {
-        // Находим соответствующую активную пару
-        const activePair = pairsData.active_pairs.find(ap => {
-            const activeId = ap._id.$oid || ap._id;
-            const pinnedId = pinnedPair.pair_id.$oid || pinnedPair.pair_id;
-            console.log('Comparing IDs:', activeId, pinnedId); // добавим лог сравнения ID
-            return activeId === pinnedId;
-        });
+            console.log('Processing pinned pairs:', pairsData.pinned_pairs);
+            
+            pairsData.pinned_pairs.forEach(pinnedPair => {
+                // Находим соответствующую активную пару
+                const activePair = pairsData.active_pairs?.find(ap => 
+                    (ap._id.$oid || ap._id) === (pinnedPair.pair_id.$oid || pinnedPair.pair_id)
+                );
 
-        console.log('Found active pair for pinned:', activePair); // добавим лог найденной пары
+                if (activePair) {
+                    const mergedPair = {
+                        ...activePair,
+                        is_pinned: true,
+                        is_active: pinnedPair.is_active
+                    };
 
-        if (activePair) {
-            const mergedPair = {
-                ...activePair,
-                is_pinned: true,
-                is_active: pinnedPair.is_active
-            };
-
-            // Применяем фильтры к закрепленной паре
-            if (filterPairs([mergedPair], filters).length > 0) {
-                const pairElement = createPairItem(mergedPair);
-                if (!pinnedPair.is_active) {
-                    pairElement.classList.add('inactive');
+                    // Применяем фильтры к закрепленной паре
+                    if (filterPairs([mergedPair], filters).length > 0) {
+                        const pairElement = createPairItem(mergedPair);
+                        if (!pinnedPair.is_active) {
+                            pairElement.classList.add('inactive');
+                        }
+                        pairsContainer.appendChild(pairElement);
+                    }
                 }
-                pairsContainer.appendChild(pairElement);
-            }
-        } else {
-            console.log('No active pair found for pinned pair:', pinnedPair);
+            });
         }
+
+        // Обработка активных пар
+        if (pairsData.active_pairs && pairsData.active_pairs.length > 0) {
+            console.log('Processing active pairs:', pairsData.active_pairs.length);
+            
+            // Создаем множество ID закрепленных пар
+            const pinnedPairIds = new Set(
+                pairsData.pinned_pairs?.map(pp => pp.pair_id.$oid || pp.pair_id) || []
+            );
+
+            // Фильтруем активные пары, исключая закрепленные
+            const activePairsToShow = pairsData.active_pairs.filter(pair => 
+                !pinnedPairIds.has(pair._id.$oid || pair._id)
+            );
+
+            // Применяем фильтры к оставшимся активным парам
+            const filteredActivePairs = filterPairs(activePairsToShow, filters);
+            console.log('Filtered active pairs:', filteredActivePairs.length);
+
+            // Добавляем отфильтрованные активные пары
+            filteredActivePairs.forEach(pair => {
+                const pairElement = createPairItem({
+                    ...pair,
+                    is_pinned: false,
+                    is_active: true
+                });
+                pairsContainer.appendChild(pairElement);
+            });
+        }
+
+        // Если нет пар для отображения
+        if (pairsContainer.children.length === 0) {
+            const noResultsMessage = document.createElement('div');
+            noResultsMessage.className = 'no-pairs';
+            noResultsMessage.textContent = (filters.selected_coins.length > 0 || 
+                                          filters.buy_exchanges.length > 0 || 
+                                          filters.sell_exchanges.length > 0)
+                ? 'Нет пар, соответствующих выбранным фильтрам'
+                : 'Нет активных пар';
+            pairsContainer.appendChild(noResultsMessage);
+        }
+
+    } catch (error) {
+        console.error('Error updating pairs:', error);
+        pairsContainer.innerHTML = '<div class="error-message">Ошибка загрузки пар</div>';
     }
 }
 
