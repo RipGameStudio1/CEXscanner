@@ -838,7 +838,7 @@ body {
     gap: 10px;
 }
 
-#addPairBtn {
+.refresh-btn {
     position: relative;
     background: white;
     border: 2px solid #333;
@@ -851,27 +851,25 @@ body {
     justify-content: center;
     cursor: pointer;
     transition: all 0.1s ease;
+    top: 0;
+    left: 0;
 }
 
-#addPairBtn:hover {
+.refresh-btn .material-icons {
+    position: relative;
+    z-index: 1;
+    opacity: 1;
+    transition: none; /* Отключаем все переходы для иконки */
+}
+
+.refresh-btn:hover {
     top: -4px;
     left: -4px;
     box-shadow: 4px 4px 0 #333;
 }
 
-#addPairBtn:active {
+.refresh-btn:active {
     top: 0;
     left: 0;
     box-shadow: 0 0 0 #333;
-    transform: translateY(0); /* Убираем трансформацию */
-}
-
-#addPairBtn .material-icons {
-    position: relative; /* Добавляем это свойство */
-    z-index: 1; /* Добавляем z-index */
-}
-
-/* Убедитесь, что иконка всегда видна */
-#addPairBtn:active .material-icons {
-    display: block;
 }
