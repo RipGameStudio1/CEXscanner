@@ -772,3 +772,46 @@ body {
 .dropdown-content::-webkit-scrollbar {
     display: none;
 }
+/* Добавляем скролл для списков бирж */
+#buyExchangesList,
+#sellExchangesList {
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 5px 0;
+}
+
+/* Стили для скролла в списках бирж */
+#buyExchangesList::-webkit-scrollbar,
+#sellExchangesList::-webkit-scrollbar {
+    width: 8px;
+    display: block;
+}
+
+#buyExchangesList::-webkit-scrollbar-track,
+#sellExchangesList::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+#buyExchangesList::-webkit-scrollbar-thumb,
+#sellExchangesList::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+#buyExchangesList::-webkit-scrollbar-thumb:hover,
+#sellExchangesList::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Выравнивание иконки и заголовка */
+.pairs-section h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.pairs-section h2 .material-icons {
+    font-size: 24px;
+}
