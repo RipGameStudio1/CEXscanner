@@ -304,48 +304,69 @@ async function updatePairs() {
             sell_exchanges: Array.from(sellExchangesList.querySelectorAll('input:checked'))
                 .map(cb => cb.value)
         };
-        console.log('Active filters:', filters);
 
         pairsContainer.innerHTML = '';
 
-        // Создаем Map закрепленных пар для быстрого поиска
-        const pinnedPairsMap = new Map();
-        if (pairsData.pinned_pairs) {
-            pairsData.pinned_pairs.forEach(pp => {
-                const id = pp.pair_id.$oid || pp.pair_id;
-                pinnedPairsMap.set(id, pp);
-            });
+        // Создаем массив всех пар для отображения
+        let allPairsToShow = [];
+
+        // Обрабатываем закрепленные пары
+        if (pairsData.pinned_pairs && pairsData.pinned_pairs.length > 0) {
+            for (const pinnedPair of pairsData.pinned_pairs) {
+                const activePair = pairsData.active_pairs.find(ap => 
+                    (ap._id.$oid || ap._id) === (pinnedPair.pair_id.$oid || pinnedPair.pair_id)
+                );
+
+                if (activePair) {
+                    allPairsToShow.push({
+                        ...activePair,
+                        is_pinned: true,
+                        is_active: pinnedPair.is_active,
+                        pinned_at: pinnedPair.pinned_at
+                    });
+                }
+            }
         }
 
-        // Обрабатываем все активные пары
+        // Добавляем неприкрепленные активные пары
         if (pairsData.active_pairs && pairsData.active_pairs.length > 0) {
-            const filteredPairs = filterPairs(pairsData.active_pairs, filters);
+            const pinnedIds = new Set(pairsData.pinned_pairs?.map(pp => pp.pair_id.$oid || pp.pair_id) || []);
             
-            filteredPairs.forEach(pair => {
-                const pairId = pair._id.$oid || pair._id;
-                const pinnedInfo = pinnedPairsMap.get(pairId);
-                
-                const pairElement = createPairItem({
+            const unpinnedPairs = pairsData.active_pairs
+                .filter(pair => !pinnedIds.has(pair._id.$oid || pair._id))
+                .map(pair => ({
                     ...pair,
-                    is_pinned: !!pinnedInfo,
-                    is_active: pinnedInfo ? pinnedInfo.is_active : true
-                });
+                    is_pinned: false,
+                    is_active: true
+                }));
 
-                if (pinnedInfo && !pinnedInfo.is_active) {
+            allPairsToShow = [...allPairsToShow, ...unpinnedPairs];
+        }
+
+        // Применяем фильтры ко всем парам
+        const filteredPairs = filterPairs(allPairsToShow, filters);
+
+        // Сортируем пары: сначала закрепленные, потом остальные
+        filteredPairs.sort((a, b) => {
+            if (a.is_pinned && !b.is_pinned) return -1;
+            if (!a.is_pinned && b.is_pinned) return 1;
+            if (a.is_pinned && b.is_pinned) {
+                // Сортируем закрепленные пары по времени закрепления
+                return new Date(b.pinned_at.$date) - new Date(a.pinned_at.$date);
+            }
+            return 0;
+        });
+
+        // Отображаем отфильтрованные пары
+        if (filteredPairs.length > 0) {
+            filteredPairs.forEach(pair => {
+                const pairElement = createPairItem(pair);
+                if (pair.is_pinned && !pair.is_active) {
                     pairElement.classList.add('inactive');
                 }
-
-                // Закрепленные пары добавляем в начало, остальные - в конец
-                if (pinnedInfo) {
-                    pairsContainer.insertBefore(pairElement, pairsContainer.firstChild);
-                } else {
-                    pairsContainer.appendChild(pairElement);
-                }
+                pairsContainer.appendChild(pairElement);
             });
-        }
-
-        // Если нет пар для отображения
-        if (pairsContainer.children.length === 0) {
+        } else {
             const noResultsMessage = document.createElement('div');
             noResultsMessage.className = 'no-pairs';
             noResultsMessage.textContent = (filters.selected_coins.length > 0 || 
