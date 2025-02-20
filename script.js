@@ -91,15 +91,26 @@ const api = {
 
     // Получение пользователя
     async getUser(telegramId) {
+        console.log('Getting user with ID:', telegramId);
         const response = await fetch(`${API_URL}/users/${telegramId}`);
+        if (!response.ok) {
+            throw new Error(`User not found: ${response.status}`);
+        }
         return await response.json();
     },
 
     // Создание пользователя
     async createUser(telegramId, username) {
-        const response = await fetch(`${API_URL}/users/${telegramId}?username=${username}`, {
-            method: 'POST'
+        console.log('Creating user:', { telegramId, username });
+        const response = await fetch(`${API_URL}/users/${telegramId}?username=${username || 'unknown'}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
         });
+        if (!response.ok) {
+            throw new Error(`Failed to create user: ${response.status}`);
+        }
         return await response.json();
     },
 
@@ -220,7 +231,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     const telegramUser = window.Telegram.WebApp.initDataUnsafe.user;
     if (telegramUser) {
         try {
-            currentUser = await api.getUser(telegramUser.id);
+            // Добавим логи для отладки
+            console.log('Telegram user data:', telegramUser);
+            
+            currentUser = await api.getUser(telegramUser.id.toString()); // Преобразуем ID в строку
             document.querySelector('.username').textContent = '@' + telegramUser.username;
             updateLicenseStatus(currentUser.license);
 
@@ -229,9 +243,17 @@ document.addEventListener('DOMContentLoaded', async function() {
                 updateLicenseStatus(currentUser.license);
             }, 60000);
 
-        } catch {
-            currentUser = await api.createUser(telegramUser.id, telegramUser.username);
-            updateLicenseStatus(currentUser.license);
+        } catch (error) {
+            console.log('Creating new user with ID:', telegramUser.id.toString());
+            try {
+                currentUser = await api.createUser(
+                    telegramUser.id.toString(), 
+                    telegramUser.username || 'unknown'
+                );
+                updateLicenseStatus(currentUser.license);
+            } catch (createError) {
+                console.error('Error creating user:', createError);
+            }
         }
     }
 }
