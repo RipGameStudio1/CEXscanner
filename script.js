@@ -147,10 +147,8 @@ async function checkLicenseStatus(telegramId) {
 // Функция фильтрации пар
 function filterPairs(pairs, filters) {
     return pairs.filter(pair => {
-        // Для закрепленных пар нужно проверить наличие всех необходимых полей
+        // Если пара не содержит необходимых данных, пропускаем её
         if (!pair.coin_pair) {
-            // Если это закрепленная пара, возможно нужно получить данные из другого поля
-            // или пропустить фильтрацию
             return true;
         }
 
@@ -163,17 +161,15 @@ function filterPairs(pairs, filters) {
         }
 
         // Фильтр по бирже покупки
-        if (filters.buy_exchanges.length > 0) {
-            if (!filters.buy_exchange || !filters.buy_exchanges.includes(pair.buy_exchange)) {
-                return false;
-            }
+        // Если фильтр бирж покупки активен, проверяем соответствие
+        if (filters.buy_exchanges.length > 0 && !filters.buy_exchanges.includes(pair.buy_exchange)) {
+            return false;
         }
 
         // Фильтр по бирже продажи
-        if (filters.sell_exchanges.length > 0) {
-            if (!filters.sell_exchange || !filters.sell_exchanges.includes(pair.sell_exchange)) {
-                return false;
-            }
+        // Если фильтр бирж продажи активен, проверяем соответствие
+        if (filters.sell_exchanges.length > 0 && !filters.sell_exchanges.includes(pair.sell_exchange)) {
+            return false;
         }
 
         return true;
