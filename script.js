@@ -1,5 +1,42 @@
 
 const API_URL = 'https://underground-mia-slimeapp-847f161d.koyeb.app';
+
+function updatePairTimer(pairItem, timerElement) {
+    const aliveTime = pairItem.dataset.aliveTime;
+    if (!aliveTime) return;
+
+    const startTime = new Date(aliveTime);
+    const now = new Date();
+    const diff = Math.floor((now - startTime) / 1000);
+
+    // Форматируем время
+    let timerText;
+    if (diff < 60) {
+        // Только секунды
+        timerText = `${diff}с`;
+    } else if (diff < 3600) {
+        // Минуты и секунды
+        const minutes = Math.floor(diff / 60);
+        const seconds = diff % 60;
+        timerText = `${minutes}м ${seconds}с`;
+    } else if (diff < 86400) {
+        // Часы, минуты и секунды
+        const hours = Math.floor(diff / 3600);
+        const minutes = Math.floor((diff % 3600) / 60);
+        const seconds = diff % 60;
+        timerText = `${hours}ч ${minutes}м ${seconds}с`;
+    } else {
+        // Дни, часы, минуты и секунды
+        const days = Math.floor(diff / 86400);
+        const hours = Math.floor((diff % 86400) / 3600);
+        const minutes = Math.floor((diff % 3600) / 60);
+        const seconds = diff % 60;
+        timerText = `${days}д ${hours}ч ${minutes}м ${seconds}с`;
+    }
+
+    timerElement.textContent = timerText;
+}
+
 // Функция форматирования оставшегося времени
 function formatTimeRemaining(expiresAt) {
     if (!expiresAt) return 'не указано';
@@ -414,7 +451,11 @@ async function updatePairs() {
 
 	const pairId = pairData._id.$oid || pairData.pair_id?.$oid || pairData._id;
     	pairItem.dataset.id = pairId;
-
+	
+	if (pairData.alive_time) {
+        	pairItem.dataset.aliveTime = pairData.alive_time.$date || pairData.alive_time;
+    	}
+	    
         pairItem.innerHTML = `
             <div class="exchanges">
                 <div class="buy-exchange">
@@ -490,9 +531,10 @@ async function updatePairs() {
                 console.error('Error toggling pin:', error);
             }
         });
+	const timerElement = pairItem.querySelector('.pair-timer');
+    	updatePairTimer(pairItem, timerElement);
         return pairItem;
     }
-
     // Обработчики событий
     selectAllCheckbox.addEventListener('change', function() {
         const checkboxes = cryptoListContainer.querySelectorAll('input[type="checkbox"]:not(.hidden)');
@@ -722,4 +764,5 @@ async function updatePairs() {
 
     // Запускаем обновление таймеров
     setInterval(updateTimers, 1000);
+    setInterval(updateAllTimers, 1000);
 });
