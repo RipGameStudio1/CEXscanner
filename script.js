@@ -217,21 +217,22 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // Инициализация пользователя из Telegram WebApp
 	if (window.Telegram && window.Telegram.WebApp) {
-	const telegramUser = window.Telegram.WebApp.initDataUnsafe.user;
-if (telegramUser) {
-    try {
-        currentUser = await api.getUser(telegramUser.id);
-        document.querySelector('.username').textContent = '@' + telegramUser.username;
-        updateLicenseStatus(currentUser.license);
-
-        // Обновляем статус лицензии каждую минуту
-        setInterval(() => {
+    const telegramUser = window.Telegram.WebApp.initDataUnsafe.user;
+    if (telegramUser) {
+        try {
+            currentUser = await api.getUser(telegramUser.id);
+            document.querySelector('.username').textContent = '@' + telegramUser.username;
             updateLicenseStatus(currentUser.license);
-        }, 60000);
 
-    } catch {
-        currentUser = await api.createUser(telegramUser.id, telegramUser.username);
-        updateLicenseStatus(currentUser.license);
+            // Обновляем статус лицензии каждую минуту
+            setInterval(() => {
+                updateLicenseStatus(currentUser.license);
+            }, 60000);
+
+        } catch {
+            currentUser = await api.createUser(telegramUser.id, telegramUser.username);
+            updateLicenseStatus(currentUser.license);
+        }
     }
 }
 
