@@ -391,50 +391,6 @@ async function updatePairs() {
         pairsContainer.innerHTML = '<div class="error-message">Ошибка загрузки пар</div>';
     }
 }
-
-        // Обработка активных пар
-        if (pairsData.active_pairs && pairsData.active_pairs.length > 0) {
-            console.log('Processing active pairs:', pairsData.active_pairs.length); // Отладочный вывод
-            
-            // Создаем множество ID закрепленных пар
-            const pinnedPairIds = new Set(
-                pairsData.pinned_pairs?.map(pp => pp.pair_id.$oid || pp.pair_id) || []
-            );
-
-            // Фильтруем и отображаем активные пары
-            const activePairsToShow = pairsData.active_pairs.filter(pair => 
-                !pinnedPairIds.has(pair._id.$oid || pair._id)
-            );
-
-            const filteredActivePairs = filterPairs(activePairsToShow, filters);
-            console.log('Filtered active pairs:', filteredActivePairs.length); // Отладочный вывод
-
-            filteredActivePairs.forEach(pair => {
-                const pairElement = createPairItem({
-                    ...pair,
-                    is_pinned: false
-                });
-                pairsContainer.appendChild(pairElement);
-            });
-        }
-
-        // Показываем сообщение, если нет пар для отображения
-        if (pairsContainer.children.length === 0) {
-            const noResultsMessage = document.createElement('div');
-            noResultsMessage.className = 'no-pairs';
-            noResultsMessage.textContent = (filters.selected_coins.length > 0 || 
-                                          filters.buy_exchanges.length > 0 || 
-                                          filters.sell_exchanges.length > 0)
-                ? 'Нет пар, соответствующих выбранным фильтрам'
-                : 'Нет активных пар';
-            pairsContainer.appendChild(noResultsMessage);
-        }
-
-    } catch (error) {
-        console.error('Error updating pairs:', error);
-        pairsContainer.innerHTML = '<div class="error-message">Ошибка загрузки пар</div>';
-    }
-}
     // Рендеринг списка криптовалют
     function renderCryptoList(coins) {
         cryptoListContainer.innerHTML = coins.map(coin => `
