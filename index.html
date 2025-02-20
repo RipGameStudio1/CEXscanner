@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?ver=10">
+    <link rel="stylesheet" href="styles.css?ver=5">
 </head>
 <body>
     <div class="container">
@@ -91,24 +91,24 @@
             </div>
         </section>
 
-        <button id="addPairBtn" class="add-pair-btn">
-            <span class="material-icons">add</span>
-            Добавить пару
-        </button>
-
         <section class="pairs-section">
             <h2>
                 <div class="header-left">
                     <span class="material-icons">currency_exchange</span>
                     Торговые пары
                 </div>
-                <div class="view-toggle">
-                    <button class="view-btn active" data-view="list">
-                        <span class="material-icons">view_list</span>
+                <div class="header-controls">
+                    <button id="addPairBtn" class="view-btn">
+                        <span class="material-icons">refresh</span>
                     </button>
-                    <button class="view-btn" data-view="grid">
-                        <span class="material-icons">grid_view</span>
-                    </button>
+                    <div class="view-toggle">
+                        <button class="view-btn active" data-view="list">
+                            <span class="material-icons">view_list</span>
+                        </button>
+                        <button class="view-btn" data-view="grid">
+                            <span class="material-icons">grid_view</span>
+                        </button>
+                    </div>
                 </div>
             </h2>
             <div class="pairs-container" id="pairsContainer">
