@@ -160,6 +160,7 @@ async function checkLicenseStatus(telegramId) {
 }
 // Функция фильтрации пар
 function filterPairs(pairs, filters) {
+    console.log('Filtering pairs:', pairs, 'with filters:', filters); // добавим лог входных данных
     return pairs.filter(pair => {
         // Если пара не содержит необходимых данных, пропускаем её
         if (!pair.coin_pair) {
@@ -320,32 +321,40 @@ async function updatePairs() {
 
         // Обработка закрепленных пар
         if (pairsData.pinned_pairs && pairsData.pinned_pairs.length > 0) {
-            console.log('Processing pinned pairs:', pairsData.pinned_pairs); // Отладочный вывод
-            
-            for (const pinnedPair of pairsData.pinned_pairs) {
-                // Находим соответствующую активную пару
-                const activePair = pairsData.active_pairs.find(ap => 
-                    (ap._id.$oid || ap._id) === (pinnedPair.pair_id.$oid || pinnedPair.pair_id)
-                );
+    console.log('Processing pinned pairs:', pairsData.pinned_pairs);
+    console.log('Available active pairs:', pairsData.active_pairs); // добавим лог активных пар
+    
+    for (const pinnedPair of pairsData.pinned_pairs) {
+        // Находим соответствующую активную пару
+        const activePair = pairsData.active_pairs.find(ap => {
+            const activeId = ap._id.$oid || ap._id;
+            const pinnedId = pinnedPair.pair_id.$oid || pinnedPair.pair_id;
+            console.log('Comparing IDs:', activeId, pinnedId); // добавим лог сравнения ID
+            return activeId === pinnedId;
+        });
 
-                if (activePair) {
-                    const mergedPair = {
-                        ...activePair,
-                        is_pinned: true,
-                        is_active: pinnedPair.is_active
-                    };
+        console.log('Found active pair for pinned:', activePair); // добавим лог найденной пары
 
-                    // Применяем фильтры к закрепленной паре
-                    if (filterPairs([mergedPair], filters).length > 0) {
-                        const pairElement = createPairItem(mergedPair);
-                        if (!pinnedPair.is_active) {
-                            pairElement.classList.add('inactive');
-                        }
-                        pairsContainer.appendChild(pairElement);
-                    }
+        if (activePair) {
+            const mergedPair = {
+                ...activePair,
+                is_pinned: true,
+                is_active: pinnedPair.is_active
+            };
+
+            // Применяем фильтры к закрепленной паре
+            if (filterPairs([mergedPair], filters).length > 0) {
+                const pairElement = createPairItem(mergedPair);
+                if (!pinnedPair.is_active) {
+                    pairElement.classList.add('inactive');
                 }
+                pairsContainer.appendChild(pairElement);
             }
+        } else {
+            console.log('No active pair found for pinned pair:', pinnedPair);
         }
+    }
+}
 
         // Обработка активных пар
         if (pairsData.active_pairs && pairsData.active_pairs.length > 0) {
