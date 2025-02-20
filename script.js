@@ -450,7 +450,7 @@ async function updatePairs() {
        		pinIcon.classList.add('pinned');
     	}
         pinIcon.addEventListener('click', async () => {
-            e.stopPropagation(); // Предотвращаем всплытие события	
+            event.stopPropagation(); // Предотвращаем всплытие события	
 	    if (!currentUser) return;
 	
             const isPinned = pinIcon.classList.contains('pinned');
