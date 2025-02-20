@@ -130,7 +130,10 @@ const api = {
 function updateLicenseStatus(license) {
     const licenseStatusElement = document.querySelector('.license-status');
     if (!licenseStatusElement || !license) return;
-    
+    if (license.type === "Free") {
+        licenseStatusElement.innerHTML = `${license.type}`;
+        return;
+    }
     const now = new Date();
     const expiresAt = license.expires_at;
     
