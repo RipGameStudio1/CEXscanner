@@ -521,11 +521,11 @@ async function updatePairs() {
             <div class="exchanges">
                 <div class="buy-exchange">
                     <span class="exchange-name">${pairData.buy_exchange}</span>
-                    <span class="exchange-price">$${pairData.buy_price.toFixed(2)}</span>
+                    <span class="exchange-price">$${pairData.buy_price}</span>
                 </div>
                 <div class="sell-exchange">
                     <span class="exchange-name">${pairData.sell_exchange}</span>
-                    <span class="exchange-price">$${pairData.sell_price.toFixed(2)}</span>
+                    <span class="exchange-price">$${pairData.sell_price}</span>
                 </div>
             </div>
             <div class="pair-details">
@@ -550,11 +550,11 @@ async function updatePairs() {
                     </div>
                     <div class="info-item price-buy">
                         <span class="label">Цена покупки</span>
-                        <span class="value">$${pairData.buy_price.toFixed(2)}</span>
+                        <span class="value">$${pairData.buy_price}</span>
                     </div>
                     <div class="info-item price-sell">
                         <span class="label">Цена продажи</span>
-                        <span class="value">$${pairData.sell_price.toFixed(2)}</span>
+                        <span class="value">$${pairData.sell_price}</span>
                     </div>
                 </div>
                 <div class="bottom-info">
