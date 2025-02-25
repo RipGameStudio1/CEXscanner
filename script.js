@@ -560,16 +560,6 @@ async function updatePairs() {
 	                    <span class="label">Цена продажи</span>
 	                    <span class="value">$${pairData.sell_price}</span>
 	                </div>
-	                <div class="list-prices">
-	                    <div class="list-price-item">
-	                        <span class="label">Покупка:</span>
-	                        <span class="value">$${pairData.buy_price}</span>
-	                    </div>
-	                    <div class="list-price-item">
-	                        <span class="label">Продажа:</span>
-	                        <span class="value">$${pairData.sell_price}</span>
-	                    </div>
-	                </div>
 	            </div>
 	            <div class="bottom-info">
 	                <span class="pair-timer">15с</span>
