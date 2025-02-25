@@ -180,7 +180,7 @@ body {
 /* Специальные стили для цен в режиме списка */
 .pairs-container:not(.grid) .price-buy,
 .pairs-container:not(.grid) .price-sell {
-    display: none;
+    display: none !important;
 }
 
 .pairs-container:not(.grid) .price-buy .label,
@@ -221,15 +221,30 @@ body {
     padding: 15px;
     height: 50%;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
 }
 
 .pairs-container:not(.grid) .exchange-name {
     font-size: 16px;
     font-weight: 700;
 }
+
+.pairs-container:not(.grid) .exchange-direction {
+    margin-right: 8px;
+}
+
+.pairs-container:not(.grid) .exchange-direction .material-icons {
+    font-size: 18px;
+}
+
+.pairs-container:not(.grid) .exchange-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 
 .pairs-container:not(.grid) .exchange-price {
     font-weight: 350;
@@ -296,9 +311,10 @@ body {
 }
 
 .pairs-container.grid .pair-item {
-    height: 280px;
+    height: 320px; /* Фиксированная высота для режима сетки */
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 .pairs-container.grid .exchanges {
@@ -339,11 +355,36 @@ body {
 }
 
 .pairs-container.grid .pair-info {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    overflow-y: auto;
+    max-height: 200px; /* Максимальная высота для контента */
 }
 
+.list-price-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.list-price-item .label {
+    font-size: 14px;
+    color: #666;
+}
+
+.list-price-item .value {
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.pairs-container:not(.grid) .list-prices {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-left: auto; /* Прижимаем к правому краю */
+}
+
+.list-prices {
+    display: none; /* По умолчанию скрыто */
+}
 .pairs-container:not(.grid) .info-item {
     display: flex;
     flex-direction: column;
@@ -879,6 +920,8 @@ body {
     cursor: pointer;
     position: relative;
     transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
 }
 
 .buy-exchange:hover, .sell-exchange:hover {
@@ -889,6 +932,32 @@ body {
     filter: brightness(0.9);
     transform: scale(0.98);
 }
+
+.exchange-direction {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+}
+
+.exchange-direction .material-icons {
+    font-size: 20px;
+    color: rgba(0, 0, 0, 0.6);
+}
+.exchange-info {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+.buy-exchange .exchange-direction .material-icons {
+    color: #2e7d32; /* Зеленый цвет для стрелки вниз */
+}
+
+.sell-exchange .exchange-direction .material-icons {
+    color: #c62828; /* Красный цвет для стрелки вверх */
+}
+
+
 
 /* Добавляем индикатор кликабельности */
 .buy-exchange::after, .sell-exchange::after {
