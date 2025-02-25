@@ -507,95 +507,117 @@ async function updatePairs() {
 
     // Создание карточки пары
     function createPairItem(pairData) {
-        const pairItem = document.createElement('div');
-        pairItem.className = 'pair-item new';
-
-	const pairId = pairData._id.$oid || pairData.pair_id?.$oid || pairData._id;
-    	pairItem.dataset.id = pairId;
+	    const pairItem = document.createElement('div');
+	    pairItem.className = 'pair-item new';
 	
-	if (pairData.alive_time) {
-        	pairItem.dataset.aliveTime = pairData.alive_time.$date || pairData.alive_time;
-    	}
+	    const pairId = pairData._id.$oid || pairData.pair_id?.$oid || pairData._id;
+	    pairItem.dataset.id = pairId;
 	    
-        pairItem.innerHTML = `
-            <div class="exchanges">
-                <div class="buy-exchange">
-                    <span class="exchange-name">${pairData.buy_exchange}</span>
-                    <span class="exchange-price">$${pairData.buy_price}</span>
-                </div>
-                <div class="sell-exchange">
-                    <span class="exchange-name">${pairData.sell_exchange}</span>
-                    <span class="exchange-price">$${pairData.sell_price}</span>
-                </div>
-            </div>
-            <div class="pair-details">
-                <div class="pair-info">
-                    <div class="pair-network-group">
-                        <div class="info-item">
-                            <span class="label">Пара</span>
-                            <span class="value">${pairData.coin_pair}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="label">Сеть</span>
-                            <span class="value">${pairData.network}</span>
-                        </div>
-                    </div>
-                    <div class="info-item">
-                        <span class="label">Спред</span>
-                        <span class="value">${pairData.spread}%</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="label">Комиссия</span>
-                        <span class="value">${pairData.commission} ${pairData.coin_pair.split('/')[0]}</span>
-                    </div>
-                    <div class="info-item price-buy">
-                        <span class="label">Цена покупки</span>
-                        <span class="value">$${pairData.buy_price}</span>
-                    </div>
-                    <div class="info-item price-sell">
-                        <span class="label">Цена продажи</span>
-                        <span class="value">$${pairData.sell_price}</span>
-                    </div>
-                </div>
-                <div class="bottom-info">
-                    <span class="pair-timer">15с</span>
-                    <span class="material-icons pin-icon">push_pin</span>
-                </div>
-            </div>
-        `;
-
-        // Добавляем обработчик для кнопки закрепления
-        const pinIcon = pairItem.querySelector('.pin-icon');
-	if (pairData.is_pinned) {
-       		pinIcon.classList.add('pinned');
-    	}
-        pinIcon.addEventListener('click', async () => {
-            event.stopPropagation(); // Предотвращаем всплытие события	
-	    if (!currentUser) return;
+	    if (pairData.alive_time) {
+	        pairItem.dataset.aliveTime = pairData.alive_time.$date || pairData.alive_time;
+	    }
+	    
+	    // Сохраняем URL для покупки и продажи
+	    const buyUrl = pairData.buy_url || '#';
+	    const sellUrl = pairData.sell_url || '#';
+	    
+	    pairItem.innerHTML = `
+	        <div class="exchanges">
+	            <div class="buy-exchange" data-url="${buyUrl}">
+	                <span class="exchange-name">${pairData.buy_exchange}</span>
+	                <span class="exchange-price">$${pairData.buy_price}</span>
+	            </div>
+	            <div class="sell-exchange" data-url="${sellUrl}">
+	                <span class="exchange-name">${pairData.sell_exchange}</span>
+	                <span class="exchange-price">$${pairData.sell_price}</span>
+	            </div>
+	        </div>
+	        <div class="pair-details">
+	            <div class="pair-info">
+	                <div class="pair-network-group">
+	                    <div class="info-item">
+	                        <span class="label">Пара</span>
+	                        <span class="value">${pairData.coin_pair}</span>
+	                    </div>
+	                    <div class="info-item">
+	                        <span class="label">Сеть</span>
+	                        <span class="value">${pairData.network}</span>
+	                    </div>
+	                </div>
+	                <div class="info-item">
+	                    <span class="label">Спред</span>
+	                    <span class="value">${pairData.spread}%</span>
+	                </div>
+	                <div class="info-item">
+	                    <span class="label">Комиссия</span>
+	                    <span class="value">${pairData.commission} ${pairData.coin_pair.split('/')[0]}</span>
+	                </div>
+	                <div class="info-item price-buy">
+	                    <span class="label">Цена покупки</span>
+	                    <span class="value">$${pairData.buy_price}</span>
+	                </div>
+	                <div class="info-item price-sell">
+	                    <span class="label">Цена продажи</span>
+	                    <span class="value">$${pairData.sell_price}</span>
+	                </div>
+	            </div>
+	            <div class="bottom-info">
+	                <span class="pair-timer">15с</span>
+	                <span class="material-icons pin-icon">push_pin</span>
+	            </div>
+	        </div>
+	    `;
 	
-            const isPinned = pinIcon.classList.contains('pinned');
-            try {
-		const isPinned = pinIcon.classList.contains('pinned');
-                if (isPinned) {
-                    await api.unpinPair(pairId, currentUser.telegram_id);
-                    pinIcon.classList.remove('pinned');
-                    pinIcon.style.color = '#666';
-                } else {
-                    await api.pinPair(pairId, currentUser.telegram_id);
-                    pinIcon.classList.add('pinned');
-                    pinIcon.style.color = '#2196F3';
-                }
-                setTimeout(() => {
-                    updatePairs();
-                }, 100);
-            } catch (error) {
-                console.error('Error toggling pin:', error);
-            }
-        });
-	const timerElement = pairItem.querySelector('.pair-timer');
-    	startPairTimer(pairItem);
-        return pairItem;
-    }
+	    // Добавляем обработчик для кнопки закрепления
+	    const pinIcon = pairItem.querySelector('.pin-icon');
+	    if (pairData.is_pinned) {
+	        pinIcon.classList.add('pinned');
+	    }
+	    pinIcon.addEventListener('click', async (event) => {
+	        event.stopPropagation(); // Предотвращаем всплытие события    
+	        if (!currentUser) return;
+	    
+	        const isPinned = pinIcon.classList.contains('pinned');
+	        try {
+	            if (isPinned) {
+	                await api.unpinPair(pairId, currentUser.telegram_id);
+	                pinIcon.classList.remove('pinned');
+	                pinIcon.style.color = '#666';
+	            } else {
+	                await api.pinPair(pairId, currentUser.telegram_id);
+	                pinIcon.classList.add('pinned');
+	                pinIcon.style.color = '#2196F3';
+	            }
+	            setTimeout(() => {
+	                updatePairs();
+	            }, 100);
+	        } catch (error) {
+	            console.error('Error toggling pin:', error);
+	        }
+	    });
+	
+	    // Добавляем обработчики для зон покупки и продажи
+	    const buyExchange = pairItem.querySelector('.buy-exchange');
+	    const sellExchange = pairItem.querySelector('.sell-exchange');
+	    
+	    buyExchange.addEventListener('click', () => {
+	        const url = buyExchange.dataset.url;
+	        if (url && url !== '#') {
+	            window.open(url, '_blank');
+	        }
+	    });
+	    
+	    sellExchange.addEventListener('click', () => {
+	        const url = sellExchange.dataset.url;
+	        if (url && url !== '#') {
+	            window.open(url, '_blank');
+	        }
+	    });
+	    
+	    const timerElement = pairItem.querySelector('.pair-timer');
+	    startPairTimer(pairItem);
+	    return pairItem;
+}
     // Обработчики событий
     selectAllCheckbox.addEventListener('change', function() {
         const checkboxes = cryptoListContainer.querySelectorAll('input[type="checkbox"]:not(.hidden)');
