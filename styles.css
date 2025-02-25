@@ -362,11 +362,22 @@ body {
 .pairs-container.grid .pair-network-group {
     display: contents;
 }
-
+.buy-exchange, .sell-exchange {
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease;
+}
+.buy-exchange:hover, .sell-exchange:hover {
+    filter: brightness(1.1);
+}
 /* Общие стили */
 .buy-exchange {
     background: #c8e6c9;
 }
+.buy-exchange:active, .sell-exchange:active {
+    filter: brightness(0.9);
+}
+
 
 .sell-exchange {
     background: #ffcdd2;
