@@ -180,7 +180,7 @@ body {
 /* Специальные стили для цен в режиме списка */
 .pairs-container:not(.grid) .price-buy,
 .pairs-container:not(.grid) .price-sell {
-    display: none !important;
+    display: none;
 }
 
 .pairs-container:not(.grid) .price-buy .label,
@@ -221,30 +221,15 @@ body {
     padding: 15px;
     height: 50%;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
 }
 
 .pairs-container:not(.grid) .exchange-name {
     font-size: 16px;
     font-weight: 700;
 }
-
-.pairs-container:not(.grid) .exchange-direction {
-    margin-right: 8px;
-}
-
-.pairs-container:not(.grid) .exchange-direction .material-icons {
-    font-size: 18px;
-}
-
-.pairs-container:not(.grid) .exchange-info {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
 
 .pairs-container:not(.grid) .exchange-price {
     font-weight: 350;
@@ -311,10 +296,9 @@ body {
 }
 
 .pairs-container.grid .pair-item {
-    height: 320px; /* Фиксированная высота для режима сетки */
+    height: 280px;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
 }
 
 .pairs-container.grid .exchanges {
@@ -355,36 +339,492 @@ body {
 }
 
 .pairs-container.grid .pair-info {
-    overflow-y: auto;
-    max-height: 200px; /* Максимальная высота для контента */
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
 }
 
-.list-price-item {
+.pairs-container:not(.grid) .info-item {
     display: flex;
-    align-items: center;
-    gap: 5px;
+    flex-direction: column;
+    gap: 4px;
 }
 
-.list-price-item .label {
-    font-size: 14px;
+.pairs-container.grid .bottom-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #ddd;
+}
+
+.pairs-container.grid .pair-network-group {
+    display: contents;
+}
+
+/* Общие стили */
+.buy-exchange {
+    background: #c8e6c9;
+}
+
+.sell-exchange {
+    background: #ffcdd2;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.label {
+    color: #666;
+    font-size: 13px;
+}
+
+.value {
+    font-weight: 500;
+}
+
+.pair-timer {
     color: #666;
 }
 
-.list-price-item .value {
-    font-weight: 600;
-    font-size: 16px;
+.pin-icon {
+    cursor: pointer;
+    color: #666;
+    transition: color 0.3s ease;
 }
 
-.pairs-container:not(.grid) .list-prices {
+.pin-icon.pinned {
+    color: #2196F3;
+}
+
+/* Анимации */
+.transitioning .pair-item {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.transitioning .exchanges,
+.transitioning .pair-details,
+.transitioning .pair-info,
+.transitioning .info-item {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Стили для скролла */
+.dropdown-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.dropdown-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.dropdown-content::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.dropdown-content::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Медиа запросы */
+@media (max-width: 600px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .pairs-container.grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .pairs-container {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 15px !important;
+    }
+
+    .pair-item {
+        flex-direction: column !important;
+        height: auto !important;
+    }
+
+    .view-toggle {
+        display: none;
+    }
+}
+
+/* Анимации для карточек */
+.pair-item {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.pair-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+.pair-item::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    transition: 0.5s;
+}
+
+.pair-item:hover::after {
+    left: 100%;
+}
+
+/* Анимации для цен */
+@keyframes priceUpdate {
+    0% {
+        transform: scale(1);
+        color: inherit;
+    }
+    50% {
+        transform: scale(1.1);
+        color: #2196F3;
+    }
+    100% {
+        transform: scale(1);
+        color: inherit;
+    }
+}
+
+.exchange-price {
+    transition: all 0.3s ease;
+}
+
+.exchange-price.updating {
+    animation: priceUpdate 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Анимации для кнопок */
+.filter-btn,
+.add-pair-btn,
+.view-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.filter-btn:hover,
+.add-pair-btn:hover,
+.view-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.filter-btn:active,
+.add-pair-btn:active,
+.view-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+
+/* Анимация для pin-icon */
+@keyframes pinRotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    25% {
+        transform: rotate(20deg);
+    }
+    75% {
+        transform: rotate(-15deg);
+    }
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+.pin-icon {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.pin-icon:hover {
+    animation: pinRotate 0.5s ease;
+    color: #2196F3;
+}
+
+.pin-icon.pinned {
+    transform: rotate(45deg);
+    color: #2196F3;
+}
+
+
+/* Анимация для dropdown */
+.dropdown-content {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: top center;
+    opacity: 0;
+    transform: scaleY(0);
+}
+
+.dropdown-content.show {
+    opacity: 1;
+    transform: scaleY(1);
+}
+
+/* Анимация для чекбоксов в dropdown */
+.dropdown-content label {
+    transition: all 0.2s ease;
+}
+
+.dropdown-content label:hover {
+    background-color: #f5f5f5;
+}
+
+.dropdown-content input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+/* Кнопка добавления пары */
+.add-pair-btn {
+    padding: 10px 20px;
+    border: 2px solid #333;
+    border-radius: 10px;
+    background: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 15px;
+    font-family: 'Comfortaa', cursive;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.add-pair-btn:hover {
+    background-color: #f5f5f5;
+}
+
+.add-pair-btn:active {
+    transform: scale(0.98);
+}
+
+/* Переключатель видов */
+.view-toggle {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.view-btn {
+    padding: 8px;
+    border: 2px solid #333;
+    border-radius: 10px;
+    background: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    transition: all 0.3s ease;
+}
+
+.view-btn.active {
+    background: #64b5f6;
+    color: white;
+}
+
+/* Карточки пар */
+.pair-item {
+    margin-bottom: 15px;
+    border: 2px solid #333;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+    order: 0;
+}
+
+/* Специальные стили для цен в режиме списка */
+.pairs-container:not(.grid) .price-buy,
+.pairs-container:not(.grid) .price-sell {
+    display: none;
+}
+
+.pairs-container:not(.grid) .price-buy .label,
+.pairs-container:not(.grid) .price-sell .label {
+    display: none;
+}
+
+.pairs-container:not(.grid) .price-buy .value,
+.pairs-container:not(.grid) .price-sell .value {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.pairs-container:not(.grid) .price-buy {
+    order: 2;
+}
+
+.pairs-container:not(.grid) .price-sell {
+    order: 1;
+}
+
+/* Стили для режима списка */
+.pairs-container:not(.grid) .pair-item {
+    display: flex;
+    align-items: stretch;
+    height: 120px;
+}
+
+.pairs-container:not(.grid) .exchanges {
     display: flex;
     flex-direction: column;
-    gap: 5px;
-    margin-left: auto; /* Прижимаем к правому краю */
+    width: 120px;
 }
 
-.list-prices {
-    display: none; /* По умолчанию скрыто */
+.pairs-container:not(.grid) .buy-exchange,
+.pairs-container:not(.grid) .sell-exchange {
+    width: 120px;
+    padding: 15px;
+    height: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
+
+.pairs-container:not(.grid) .exchange-name {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.pairs-container:not(.grid) .exchange-price {
+    font-weight: 350;
+    opacity: 1;
+    transform: translateY(3px);
+}
+
+.pairs-container:not(.grid) .pair-details {
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    flex-grow: 1;
+    height: 100%;
+    background: #f3f3f3;
+}
+
+.pairs-container:not(.grid) .pair-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1;
+    gap: 10px;
+}
+
+.pairs-container:not(.grid) .info-item,
+.pairs-container:not(.grid) .pair-network-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+}
+
+.pairs-container:not(.grid) .bottom-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border-top: none;
+    padding-top: 0;
+    margin-top: 0;
+}
+
+.pairs-container:not(.grid) .pair-timer {
+    margin-right: 15px;
+}
+
+
+.pairs-container:not(.grid) .pair-network-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.pairs-container:not(.grid) .info-item.price-sell,
+.pairs-container:not(.grid) .info-item.price-buy {
+    display: none !important;
+}
+
+/* Стили для режима сетки */
+.pairs-container.grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.pairs-container.grid .pair-item {
+    height: 280px;
+    display: flex;
+    flex-direction: column;
+}
+
+.pairs-container.grid .exchanges {
+    display: flex;
+    border-bottom: 1px solid #333;
+}
+
+.pairs-container.grid .buy-exchange,
+.pairs-container.grid .sell-exchange {
+    width: 50%;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.pairs-container.grid .exchange-name {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.pairs-container.grid .exchange-price {
+    font-size: 16px;
+    color: #333;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.pairs-container.grid .pair-details {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    background: #f8f9fa;
+}
+
+.pairs-container.grid .pair-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
 .pairs-container:not(.grid) .info-item {
     display: flex;
     flex-direction: column;
@@ -821,98 +1261,106 @@ body {
     padding: 5px 0;
 }
 
+/* Добавляем скролл для списков бирж */
+#buyExchangesList,
+#sellExchangesList {
+max-height: 300px;
+overflow-y: auto;
+padding: 5px 0;
+}
+
 /* Стили для скролла в списках бирж */
 #buyExchangesList::-webkit-scrollbar,
 #sellExchangesList::-webkit-scrollbar {
-    width: 8px;
-    display: block;
+width: 8px;
+display: block;
 }
 
 #buyExchangesList::-webkit-scrollbar-track,
 #sellExchangesList::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 4px;
+background: #f1f1f1;
+border-radius: 4px;
 }
 
 #buyExchangesList::-webkit-scrollbar-thumb,
 #sellExchangesList::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 4px;
+background: #888;
+border-radius: 4px;
 }
 
 #buyExchangesList::-webkit-scrollbar-thumb:hover,
 #sellExchangesList::-webkit-scrollbar-thumb:hover {
-    background: #555;
+background: #555;
 }
 
-/* Выравнивание иконки и заголовка */
+/* Выравнивание иконки и заголовка /
 .pairs-section h2 {
-    display: flex;
-    align-items: center;
-    justify-content: space-between; /* Распределяем элементы по краям */
-    gap: 10px;
-    margin: 20px 0;
+display: flex;
+align-items: center;
+justify-content: space-between; / Распределяем элементы по краям */
+gap: 10px;
+margin: 20px 0;
 }
 .pairs-section h2 .material-icons {
-    font-size: 24px;
+font-size: 24px;
 }
 
 .pairs-section h2 .header-left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+display: flex;
+align-items: center;
+gap: 10px;
 }
 
-/* Стили для view-toggle внутри заголовка */
+/* Стили для view-toggle внутри заголовка /
 .pairs-section h2 .view-toggle {
-    margin-bottom: 0; /* Убираем нижний отступ */
+margin-bottom: 0; / Убираем нижний отступ */
 }
 
 .pairs-section h2 .view-toggle .view-btn {
-    width: 35px; /* Немного уменьшаем размер кнопок */
-    height: 35px;
+width: 35px; /* Немного уменьшаем размер кнопок */
+height: 35px;
 }
 
 .header-controls {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+display: flex;
+align-items: center;
+gap: 10px;
 }
 
 .refresh-btn {
-    position: relative;
-    background: white;
-    border: 2px solid #333;
-    border-radius: 10px;
-    width: 35px;
-    height: 35px;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.1s ease;
-    top: 0;
-    left: 0;
+position: relative;
+background: white;
+border: 2px solid #333;
+border-radius: 10px;
+width: 35px;
+height: 35px;
+padding: 0;
+display: flex;
+align-items: center;
+justify-content: center;
+cursor: pointer;
+transition: all 0.1s ease;
+top: 0;
+left: 0;
 }
 
 .refresh-btn .material-icons {
-    position: relative;
-    z-index: 1;
-    opacity: 1;
-    transition: none; /* Отключаем все переходы для иконки */
+position: relative;
+z-index: 1;
+opacity: 1;
+transition: none; /* Отключаем все переходы для иконки */
 }
 
 .refresh-btn:hover {
-    top: -4px;
-    left: -4px;
-    box-shadow: 4px 4px 0 #333;
+top: -4px;
+left: -4px;
+box-shadow: 4px 4px 0 #333;
 }
 
 .refresh-btn:active {
-    top: 0;
-    left: 0;
-    box-shadow: 0 0 0 #333;
+top: 0;
+left: 0;
+box-shadow: 0 0 0 #333;
 }
 
 /* Стили для зон покупки и продажи как кнопок */
@@ -920,8 +1368,6 @@ body {
     cursor: pointer;
     position: relative;
     transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
 }
 
 .buy-exchange:hover, .sell-exchange:hover {
@@ -932,32 +1378,6 @@ body {
     filter: brightness(0.9);
     transform: scale(0.98);
 }
-
-.exchange-direction {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 8px;
-}
-
-.exchange-direction .material-icons {
-    font-size: 20px;
-    color: rgba(0, 0, 0, 0.6);
-}
-.exchange-info {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-}
-.buy-exchange .exchange-direction .material-icons {
-    color: #2e7d32; /* Зеленый цвет для стрелки вниз */
-}
-
-.sell-exchange .exchange-direction .material-icons {
-    color: #c62828; /* Красный цвет для стрелки вверх */
-}
-
-
 
 /* Добавляем индикатор кликабельности */
 .buy-exchange::after, .sell-exchange::after {
