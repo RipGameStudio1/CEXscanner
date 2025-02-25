@@ -524,18 +524,12 @@ async function updatePairs() {
 	    pairItem.innerHTML = `
 	        <div class="exchanges">
 	            <div class="buy-exchange" data-url="${buyUrl}">
-	                <span class="exchange-direction"><span class="material-icons">arrow_downward</span></span>
-	                <div class="exchange-info">
-	                    <span class="exchange-name">${pairData.buy_exchange}</span>
-	                    <span class="exchange-price">$${pairData.buy_price}</span>
-	                </div>
+	                <span class="exchange-name">${pairData.buy_exchange}</span>
+	                <span class="exchange-price">$${pairData.buy_price}</span>
 	            </div>
 	            <div class="sell-exchange" data-url="${sellUrl}">
-	                <span class="exchange-direction"><span class="material-icons">arrow_upward</span></span>
-	                <div class="exchange-info">
-	                    <span class="exchange-name">${pairData.sell_exchange}</span>
-	                    <span class="exchange-price">$${pairData.sell_price}</span>
-	                </div>
+	                <span class="exchange-name">${pairData.sell_exchange}</span>
+	                <span class="exchange-price">$${pairData.sell_price}</span>
 	            </div>
 	        </div>
 	        <div class="pair-details">
@@ -634,6 +628,7 @@ async function updatePairs() {
 	    startPairTimer(pairItem);
 	    return pairItem;
 	}
+
 
     // Обработчики событий
     selectAllCheckbox.addEventListener('change', function() {
