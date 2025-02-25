@@ -873,3 +873,32 @@ body {
     left: 0;
     box-shadow: 0 0 0 #333;
 }
+
+/* Стили для зон покупки и продажи как кнопок */
+.buy-exchange, .sell-exchange {
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.buy-exchange:hover, .sell-exchange:hover {
+    filter: brightness(1.1);
+}
+
+.buy-exchange:active, .sell-exchange:active {
+    filter: brightness(0.9);
+    transform: scale(0.98);
+}
+
+/* Добавляем индикатор кликабельности */
+.buy-exchange::after, .sell-exchange::after {
+    content: '';
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 8px;
+    height: 8px;
+    border-top: 2px solid rgba(0, 0, 0, 0.3);
+    border-right: 2px solid rgba(0, 0, 0, 0.3);
+    transform: rotate(45deg);
+}
