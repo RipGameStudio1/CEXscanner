@@ -524,12 +524,18 @@ async function updatePairs() {
 	    pairItem.innerHTML = `
 	        <div class="exchanges">
 	            <div class="buy-exchange" data-url="${buyUrl}">
-	                <span class="exchange-name">${pairData.buy_exchange}</span>
-	                <span class="exchange-price">$${pairData.buy_price}</span>
+	                <span class="exchange-direction"><span class="material-icons">arrow_downward</span></span>
+	                <div class="exchange-info">
+	                    <span class="exchange-name">${pairData.buy_exchange}</span>
+	                    <span class="exchange-price">$${pairData.buy_price}</span>
+	                </div>
 	            </div>
 	            <div class="sell-exchange" data-url="${sellUrl}">
-	                <span class="exchange-name">${pairData.sell_exchange}</span>
-	                <span class="exchange-price">$${pairData.sell_price}</span>
+	                <span class="exchange-direction"><span class="material-icons">arrow_upward</span></span>
+	                <div class="exchange-info">
+	                    <span class="exchange-name">${pairData.sell_exchange}</span>
+	                    <span class="exchange-price">$${pairData.sell_price}</span>
+	                </div>
 	            </div>
 	        </div>
 	        <div class="pair-details">
@@ -559,6 +565,16 @@ async function updatePairs() {
 	                <div class="info-item price-sell">
 	                    <span class="label">Цена продажи</span>
 	                    <span class="value">$${pairData.sell_price}</span>
+	                </div>
+	                <div class="list-prices">
+	                    <div class="list-price-item">
+	                        <span class="label">Покупка:</span>
+	                        <span class="value">$${pairData.buy_price}</span>
+	                    </div>
+	                    <div class="list-price-item">
+	                        <span class="label">Продажа:</span>
+	                        <span class="value">$${pairData.sell_price}</span>
+	                    </div>
 	                </div>
 	            </div>
 	            <div class="bottom-info">
@@ -617,7 +633,8 @@ async function updatePairs() {
 	    const timerElement = pairItem.querySelector('.pair-timer');
 	    startPairTimer(pairItem);
 	    return pairItem;
-}
+	}
+
     // Обработчики событий
     selectAllCheckbox.addEventListener('change', function() {
         const checkboxes = cryptoListContainer.querySelectorAll('input[type="checkbox"]:not(.hidden)');
