@@ -521,6 +521,22 @@ async function updatePairs() {
 	    const buyUrl = pairData.buy_url || '#';
 	    const sellUrl = pairData.sell_url || '#';
 	    
+	    // Обработка длинных значений комиссии
+	    let commissionValue = pairData.commission;
+	    let coinSymbol = pairData.coin_pair.split('/')[0];
+	    let fullCommission = `${commissionValue} ${coinSymbol}`;
+	    let displayCommission = fullCommission;
+	    
+	    // Если число длиннее 6 символов, сокращаем его
+	    if (commissionValue.toString().length > 6) {
+	        displayCommission = commissionValue.toString().substring(0, 6) + "... " + coinSymbol;
+	    }
+	    
+	    // Расчет профита в USD
+	    const availableVolumeUsd = pairData.available_volume_usd || 0;
+	    const spreadPercent = pairData.spread || 0;
+	    const profitUsd = (availableVolumeUsd * spreadPercent / 100).toFixed(2);
+	    
 	    pairItem.innerHTML = `
 	        <div class="exchanges">
 	            <div class="buy-exchange" data-url="${buyUrl}">
@@ -550,15 +566,15 @@ async function updatePairs() {
 	                </div>
 	                <div class="info-item">
 	                    <span class="label">Комиссия</span>
-	                    <span class="value">${pairData.commission} ${pairData.coin_pair.split('/')[0]}</span>
+	                    <span class="value" title="${fullCommission}">${displayCommission}</span>
 	                </div>
 	                <div class="info-item price-buy">
-	                    <span class="label">Цена покупки</span>
-	                    <span class="value">$${pairData.buy_price}</span>
+	                    <span class="label">Сумма покупки</span>
+	                    <span class="value">$${availableVolumeUsd.toFixed(2)}</span>
 	                </div>
 	                <div class="info-item price-sell">
-	                    <span class="label">Цена продажи</span>
-	                    <span class="value">$${pairData.sell_price}</span>
+	                    <span class="label">Профит в USD</span>
+	                    <span class="value">$${profitUsd}</span>
 	                </div>
 	            </div>
 	            <div class="bottom-info">
