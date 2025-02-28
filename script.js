@@ -9,6 +9,26 @@ function stopPairTimer(pairItem) {
     }
 }
 
+// Функция для правильного форматирования цен
+function formatPrice(num) {
+    // Если это очень маленькое число, отображаем в полном десятичном виде
+    if (Math.abs(num) < 0.0001) {
+        return num.toString().replace(/e[+-]\d+/, function(match) {
+            const expo = parseInt(match.slice(1));
+            if (match[0] === 'e-') {
+                let result = '0.';
+                for (let i = 0; i < expo - 1; i++) {
+                    result += '0';
+                }
+                return result + num.toString().replace('.', '').replace(/e-\d+/, '');
+            }
+            return num.toString();
+        });
+    }
+    // Обычные числа форматируем с двумя знаками после запятой
+    return parseFloat(num).toFixed(2);
+}
+
 function clearAllTimers() {
     const pairItems = document.querySelectorAll('.pair-item');
     pairItems.forEach(stopPairTimer);
@@ -535,17 +555,17 @@ async function updatePairs() {
 	    // Расчет профита в USD
 	    const availableVolumeUsd = pairData.available_volume_usd || 0;
 	    const spreadPercent = pairData.spread || 0;
-	    const profitUsd = (availableVolumeUsd * spreadPercent / 100).toFixed(2);
+	    const profitUsd = (availableVolumeUsd * spreadPercent / 100);
 	    
 	    pairItem.innerHTML = `
 	        <div class="exchanges">
 	            <div class="buy-exchange" data-url="${buyUrl}">
 	                <span class="exchange-name">${pairData.buy_exchange}</span>
-	                <span class="exchange-price">$${pairData.buy_price}</span>
+	                <span class="exchange-price">$${formatPrice(pairData.buy_price)}</span>
 	            </div>
 	            <div class="sell-exchange" data-url="${sellUrl}">
 	                <span class="exchange-name">${pairData.sell_exchange}</span>
-	                <span class="exchange-price">$${pairData.sell_price}</span>
+	                <span class="exchange-price">$${formatPrice(pairData.sell_price)}</span>
 	            </div>
 	        </div>
 	        <div class="pair-details">
@@ -570,11 +590,11 @@ async function updatePairs() {
 	                </div>
 	                <div class="info-item price-buy">
 	                    <span class="label">Сумма покупки</span>
-	                    <span class="value">$${availableVolumeUsd.toFixed(2)}</span>
+	                    <span class="value">$${formatPrice(availableVolumeUsd)}</span>
 	                </div>
 	                <div class="info-item price-sell">
 	                    <span class="label">Профит в USD</span>
-	                    <span class="value">$${profitUsd}</span>
+	                    <span class="value">$${formatPrice(profitUsd)}</span>
 	                </div>
 	            </div>
 	            <div class="bottom-info">
