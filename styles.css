@@ -290,8 +290,40 @@ body {
 /* Стили для режима сетки */
 .pairs-container.grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 15px;
+}
+
+/* Добавляем медиа-запросы для разных размеров экрана */
+@media (min-width: 992px) {
+    .pairs-container.grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 1300px) {
+    .pairs-container.grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (min-width: 1600px) {
+    .pairs-container.grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+@media (min-width: 1900px) {
+    .pairs-container.grid {
+        grid-template-columns: repeat(6, 1fr);
+    }
+}
+
+/* Также можем добавить медиа-запрос для очень широких экранов */
+@media (min-width: 2200px) {
+    .pairs-container.grid {
+        grid-template-columns: repeat(7, 1fr);
+    }
 }
 
 .pairs-container.grid .pair-item {
