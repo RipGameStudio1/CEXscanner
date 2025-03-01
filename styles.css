@@ -176,10 +176,6 @@ body {
     order: 0;
 }
 
-.pairs-container:not(.grid) .price-buy .label,
-.pairs-container:not(.grid) .price-sell .label {
-    display: none;
-}
 
 .pairs-container:not(.grid) .price-buy .value,
 .pairs-container:not(.grid) .price-sell .value {
