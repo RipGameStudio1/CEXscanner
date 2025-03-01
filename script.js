@@ -428,7 +428,9 @@ async function updatePairs() {
             return;
         }
 
-        pairsContainer.innerHTML = '<div class="loading">Загрузка пар...</div>';
+        if (pairsContainer.querySelectorAll('.pair-item').length === 0) {
+            pairsContainer.innerHTML = '<div class="loading">Загрузка пар...</div>';
+        }
         
         const pairsData = await api.getPairs(currentUser.telegram_id);
         console.log('Received pairs data:', pairsData);
@@ -442,7 +444,11 @@ async function updatePairs() {
                 .map(cb => cb.value)
         };
 
-        pairsContainer.innerHTML = '';
+        // Если нет данных, очищаем контейнер
+        if (!pairsData.active_pairs || pairsData.active_pairs.length === 0) {
+            pairsContainer.innerHTML = '<div class="no-pairs">Нет активных пар</div>';
+            return;
+        }
 
         // Создаем массив всех пар для отображения
         let allPairsToShow = [];
@@ -494,16 +500,54 @@ async function updatePairs() {
             return 0;
         });
 
-        // Отображаем отфильтрованные пары
-        if (filteredPairs.length > 0) {
-            filteredPairs.forEach(pair => {
-                const pairElement = createPairItem(pair);
-                if (pair.is_pinned && !pair.is_active) {
-                    pairElement.classList.add('inactive');
-                }
-                pairsContainer.appendChild(pairElement);
-            });
-        } else {
+        // Получаем список существующих карточек
+        const existingCards = {};
+        pairsContainer.querySelectorAll('.pair-item').forEach(card => {
+            existingCards[card.dataset.id] = card;
+        });
+
+        // Удаляем сообщение о загрузке, если оно есть
+        const loadingMsg = pairsContainer.querySelector('.loading');
+        if (loadingMsg) {
+            pairsContainer.removeChild(loadingMsg);
+        }
+
+        // Создаем массив для отслеживания обновленных карточек
+        const updatedCardIds = [];
+
+        // Обновляем существующие карточки и добавляем новые
+        filteredPairs.forEach(pair => {
+            const pairId = pair._id.$oid || pair._id;
+            updatedCardIds.push(pairId);
+            
+            if (existingCards[pairId]) {
+                // Обновляем существующую карточку
+                updateExistingCard(existingCards[pairId], pair);
+            } else {
+                // Создаем новую карточку
+                const newCard = createPairItem(pair);
+                pairsContainer.appendChild(newCard);
+            }
+        });
+
+        // Удаляем карточки, которых больше нет в данных
+        Object.keys(existingCards).forEach(id => {
+            if (!updatedCardIds.includes(id)) {
+                const cardToRemove = existingCards[id];
+                cardToRemove.classList.add('removing');
+                
+                // Анимация удаления
+                setTimeout(() => {
+                    if (cardToRemove.parentNode) {
+                        stopPairTimer(cardToRemove); // Останавливаем таймер перед удалением
+                        pairsContainer.removeChild(cardToRemove);
+                    }
+                }, 300);
+            }
+        });
+
+        // Если после фильтрации нет пар, показываем сообщение
+        if (filteredPairs.length === 0) {
             const noResultsMessage = document.createElement('div');
             noResultsMessage.className = 'no-pairs';
             noResultsMessage.textContent = (filters.selected_coins.length > 0 || 
@@ -518,6 +562,79 @@ async function updatePairs() {
         console.error('Error updating pairs:', error);
         pairsContainer.innerHTML = '<div class="error-message">Ошибка загрузки пар</div>';
     }
+}
+
+// Функция для обновления существующей карточки без пересоздания
+function updateExistingCard(cardElement, pairData) {
+    // Обновляем основные данные
+    const buyExchange = cardElement.querySelector('.buy-exchange');
+    const sellExchange = cardElement.querySelector('.sell-exchange');
+    const pairValue = cardElement.querySelector('.info-item:nth-child(1) .value');
+    const networkValue = cardElement.querySelector('.info-item:nth-child(2) .value');
+    const spreadValue = cardElement.querySelector('.spread-group .info-item:nth-child(1) .value');
+    
+    // Обработка длинных значений комиссии
+    let commissionValue = pairData.commission;
+    let coinSymbol = pairData.coin_pair.split('/')[0];
+    let fullCommission = `${commissionValue} ${coinSymbol}`;
+    let displayCommission = fullCommission;
+    
+    // Если число длиннее 6 символов, сокращаем его
+    if (commissionValue.toString().length > 6) {
+        displayCommission = commissionValue.toString().substring(0, 6) + "... " + coinSymbol;
+    }
+    
+    const commissionElement = cardElement.querySelector('.spread-group .info-item:nth-child(2) .value');
+    
+    // Расчет профита в USD
+    const availableVolumeUsd = pairData.available_volume_usd || 0;
+    const spreadPercent = pairData.spread || 0;
+    const profitUsd = (availableVolumeUsd * spreadPercent / 100);
+    
+    // Обновляем элементы
+    buyExchange.querySelector('.exchange-name').textContent = pairData.buy_exchange;
+    buyExchange.querySelector('.exchange-price').textContent = '$' + formatPrice(pairData.buy_price);
+    buyExchange.dataset.url = pairData.buy_url || '#';
+    
+    sellExchange.querySelector('.exchange-name').textContent = pairData.sell_exchange;
+    sellExchange.querySelector('.exchange-price').textContent = '$' + formatPrice(pairData.sell_price);
+    sellExchange.dataset.url = pairData.sell_url || '#';
+    
+    pairValue.textContent = pairData.coin_pair;
+    networkValue.textContent = pairData.network;
+    spreadValue.textContent = pairData.spread + '%';
+    
+    commissionElement.textContent = displayCommission;
+    commissionElement.title = fullCommission;
+    
+    const sumBuyElement = cardElement.querySelector('.price-buy .value');
+    const profitElement = cardElement.querySelector('.price-sell .value');
+    
+    sumBuyElement.textContent = '$' + formatPrice(availableVolumeUsd);
+    profitElement.textContent = '$' + formatPrice(profitUsd);
+    
+    // Обновляем статус закрепления
+    const pinIcon = cardElement.querySelector('.pin-icon');
+    if (pairData.is_pinned) {
+        pinIcon.classList.add('pinned');
+        pinIcon.style.color = '#2196F3';
+    } else {
+        pinIcon.classList.remove('pinned');
+        pinIcon.style.color = '#666';
+    }
+    
+    // Обновляем aliveTime для таймера
+    if (pairData.alive_time) {
+        cardElement.dataset.aliveTime = pairData.alive_time.$date || pairData.alive_time;
+    }
+    
+    // Добавляем класс для анимации обновления
+    cardElement.classList.add('updating');
+    
+    // Удаляем класс через 300 мс для эффекта мигания
+    setTimeout(() => {
+        cardElement.classList.remove('updating');
+    }, 300);
 }
     // Рендеринг списка криптовалют
     function renderCryptoList(coins) {
