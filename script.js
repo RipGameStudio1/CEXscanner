@@ -3,7 +3,7 @@ const API_URL = 'https://underground-mia-slimeapp-847f161d.koyeb.app';
 // Глобальные переменные для сортировки
 let currentSortField = null;
 let currentSortDirection = 'asc'; // 'asc' или 'desc'
-
+let currentUser = null
 // Функция для правильного отображения цен в полном формате
 function formatPrice(num) {
     if (num === undefined || num === null) return '0';
@@ -885,7 +885,6 @@ async function updatePairsWithTimerCleanup() {
 
 // Обработчик при загрузке DOM
 document.addEventListener('DOMContentLoaded', async function() {
-    let currentUser = null;
     let updateInterval = null;
 
     // Получаем все необходимые элементы
