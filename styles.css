@@ -1384,3 +1384,21 @@ body {
 .pairs-container.grid .spread-group {
     display: contents;
 }
+
+/* Анимация для обновляющихся карточек */
+@keyframes cardUpdate {
+    0% { background-color: rgba(33, 150, 243, 0); }
+    50% { background-color: rgba(33, 150, 243, 0.1); }
+    100% { background-color: rgba(33, 150, 243, 0); }
+}
+
+.pair-item.updating {
+    animation: cardUpdate 0.6s ease-in-out;
+}
+
+/* Анимация для удаляемых карточек */
+.pair-item.removing {
+    opacity: 0;
+    transform: scale(0.9);
+    transition: all 0.3s ease-out;
+}
