@@ -176,12 +176,6 @@ body {
     order: 0;
 }
 
-/* Специальные стили для цен в режиме списка */
-.pairs-container:not(.grid) .price-buy,
-.pairs-container:not(.grid) .price-sell {
-    display: none;
-}
-
 .pairs-container:not(.grid) .price-buy .label,
 .pairs-container:not(.grid) .price-sell .label {
     display: none;
@@ -282,10 +276,6 @@ body {
     gap: 8px;
 }
 
-.pairs-container:not(.grid) .info-item.price-sell,
-.pairs-container:not(.grid) .info-item.price-buy {
-    display: none !important;
-}
 
 /* Стили для режима сетки */
 .pairs-container.grid {
@@ -784,6 +774,24 @@ body {
     flex-direction: column;
     align-items: flex-start;
     gap: 4px;
+}
+
+.pairs-container.grid .price-group {
+    display: contents;
+}
+
+.pairs-container:not(.grid) .info-item.price-buy,
+.pairs-container:not(.grid) .info-item.price-sell {
+    display: flex !important;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.pairs-container:not(.grid) .price-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
 }
 
 .pairs-container:not(.grid) .bottom-info {
