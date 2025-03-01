@@ -1,5 +1,7 @@
-
 const API_URL = 'https://underground-mia-slimeapp-847f161d.koyeb.app';
+
+let currentSortField = null;
+let currentSortDirection = 'asc'; // 'asc' или 'desc'
 
 function stopPairTimer(pairItem) {
     const timerId = pairItem.dataset.timerId;
@@ -7,6 +9,91 @@ function stopPairTimer(pairItem) {
         clearInterval(timerId);
         delete pairItem.dataset.timerId;
     }
+}
+
+// Функция для сортировки существующих карточек
+function sortPairItems(field, direction) {
+    // Обновляем глобальное состояние
+    currentSortField = field;
+    currentSortDirection = direction;
+    
+    // Получаем все карточки
+    const pairItems = Array.from(pairsContainer.querySelectorAll('.pair-item'));
+    
+    // Разделяем на закрепленные и обычные
+    const pinnedItems = pairItems.filter(item => item.dataset.isPinned === '1');
+    const regularItems = pairItems.filter(item => item.dataset.isPinned === '0');
+    
+    // Сортируем только обычные карточки
+    regularItems.sort((a, b) => {
+        let valueA, valueB;
+        
+        // Определяем значения для сравнения в зависимости от поля
+        switch (field) {
+            case 'pair':
+            case 'network':
+                valueA = a.dataset[field].toLowerCase();
+                valueB = b.dataset[field].toLowerCase();
+                break;
+            case 'spread':
+            case 'buyPrice':
+            case 'profit':
+                valueA = parseFloat(a.dataset[field]);
+                valueB = parseFloat(b.dataset[field]);
+                break;
+            default:
+                return 0;
+        }
+        
+        // Сортировка в зависимости от направления
+        if (direction === 'asc') {
+            return valueA > valueB ? 1 : -1;
+        } else {
+            return valueA < valueB ? 1 : -1;
+        }
+    });
+    
+    // Сначала удаляем все карточки из DOM
+    pairItems.forEach(item => item.remove());
+    
+    // Добавляем сначала закрепленные, потом отсортированные обычные
+    pinnedItems.forEach(item => pairsContainer.appendChild(item));
+    regularItems.forEach(item => pairsContainer.appendChild(item));
+    
+    // Обновляем индикаторы сортировки
+    updateSortIndicators(field, direction);
+}
+
+// Функция для обновления индикаторов сортировки
+function updateSortIndicators(field, direction) {
+    // Сначала удаляем все индикаторы
+    document.querySelectorAll('.sort-indicator').forEach(el => {
+        el.textContent = '';
+        el.classList.remove('active');
+    });
+    
+    // Устанавливаем активный индикатор
+    const sortHeader = document.querySelector(`.sort-header[data-sort="${field}"]`);
+    if (sortHeader) {
+        const indicator = sortHeader.querySelector('.sort-indicator');
+        indicator.textContent = direction === 'asc' ? 'arrow_drop_up' : 'arrow_drop_down';
+        indicator.classList.add('active');
+    }
+}
+
+// Обработчик клика на заголовок для сортировки
+function handleSortClick(e) {
+    const sortHeader = e.currentTarget;
+    const field = sortHeader.dataset.sort;
+    
+    // Определяем направление: если то же поле, то меняем направление, иначе используем asc
+    let direction = 'asc';
+    if (field === currentSortField) {
+        direction = currentSortDirection === 'asc' ? 'desc' : 'asc';
+    }
+    
+    // Выполняем сортировку
+    sortPairItems(field, direction);
 }
 
 // Функция для правильного форматирования цен
@@ -606,6 +693,14 @@ function updateExistingCard(cardElement, pairData) {
     const profitUsd = (availableVolumeUsd * spreadPercent / 100);
     
     // Обновляем элементы
+	// Обновляем данные для сортировки
+    cardElement.dataset.pair = pairData.coin_pair;
+    cardElement.dataset.network = pairData.network;
+    cardElement.dataset.spread = pairData.spread || 0;
+    cardElement.dataset.buyPrice = pairData.available_volume_usd || 0;
+    cardElement.dataset.profit = ((pairData.available_volume_usd || 0) * (pairData.spread || 0) / 100);
+    cardElement.dataset.isPinned = pairData.is_pinned ? '1' : '0';
+	
     buyExchange.querySelector('.exchange-name').textContent = pairData.buy_exchange;
     buyExchange.querySelector('.exchange-price').textContent = '$' + formatPrice(pairData.buy_price);
     buyExchange.dataset.url = pairData.buy_url || '#';
@@ -712,54 +807,64 @@ function updateExistingCard(cardElement, pairData) {
 	    const profitUsd = (availableVolumeUsd * spreadPercent / 100);
 	    
 	    pairItem.innerHTML = `
-	        <div class="exchanges">
-	            <div class="buy-exchange" data-url="${buyUrl}">
-	                <span class="exchange-name">${pairData.buy_exchange}</span>
-	                <span class="exchange-price">$${formattedBuyPrice}</span>
-	            </div>
-	            <div class="sell-exchange" data-url="${sellUrl}">
-	                <span class="exchange-name">${pairData.sell_exchange}</span>
-	                <span class="exchange-price">$${formattedSellPrice}</span>
-	            </div>
-	        </div>
-	        <div class="pair-details">
-	            <div class="pair-info">
-	                <div class="pair-network-group">
-	                    <div class="info-item">
-	                        <span class="label">Пара</span>
-	                        <span class="value">${pairData.coin_pair}</span>
-	                    </div>
-	                    <div class="info-item">
-	                        <span class="label">Сеть</span>
-	                        <span class="value">${pairData.network}</span>
-	                    </div>
-	                </div>
-			 <div class="spread-group">
-		                <div class="info-item">
-		                    <span class="label">Спред</span>
-		                    <span class="value">${pairData.spread}%</span>
-		                </div>
-		                <div class="info-item">
-		                    <span class="label">Комиссия</span>
-		                    <span class="value" title="${fullCommission}">${displayCommission}</span>
-		                </div>
-		 	 </div>
-			<div class="price-group">
-		                <div class="info-item price-buy">
-		                    <span class="label">Сумма покупки</span>
-		                    <span class="value">$${availableVolumeUsd.toFixed(2)}</span>
-		                </div>
-		                <div class="info-item price-sell">
-		                    <span class="label">Профит в USD</span>
-		                    <span class="value">$${profitUsd.toFixed(2)}</span>
-		                </div>
-		  	</div>
-	            </div>
-	            <div class="bottom-info">
-	                <span class="pair-timer">15с</span>
-	                <span class="material-icons pin-icon">push_pin</span>
-	            </div>
-	        </div>
+	    <div class="exchanges">
+		<div class="buy-exchange" data-url="${buyUrl}">
+		    <span class="exchange-name">${pairData.buy_exchange}</span>
+		    <span class="exchange-price">$${formatPrice(pairData.buy_price)}</span>
+		</div>
+		<div class="sell-exchange" data-url="${sellUrl}">
+		    <span class="exchange-name">${pairData.sell_exchange}</span>
+		    <span class="exchange-price">$${formatPrice(pairData.sell_price)}</span>
+		</div>
+	    </div>
+	    <div class="pair-details">
+		<div class="pair-info">
+		    <div class="pair-network-group">
+			<div class="info-item">
+			    <span class="label sort-header" data-sort="pair">
+				Пара <span class="sort-indicator material-icons"></span>
+			    </span>
+			    <span class="value">${pairData.coin_pair}</span>
+			</div>
+			<div class="info-item">
+			    <span class="label sort-header" data-sort="network">
+				Сеть <span class="sort-indicator material-icons"></span>
+			    </span>
+			    <span class="value">${pairData.network}</span>
+			</div>
+		    </div>
+		    <div class="spread-group">
+			<div class="info-item">
+			    <span class="label sort-header" data-sort="spread">
+				Спред <span class="sort-indicator material-icons"></span>
+			    </span>
+			    <span class="value">${pairData.spread}%</span>
+			</div>
+			<div class="info-item">
+			    <span class="label">Комиссия</span>
+			    <span class="value" title="${fullCommission}">${displayCommission}</span>
+			</div>
+		    </div>
+		    <div class="price-group">
+			<div class="info-item price-buy">
+			    <span class="label sort-header" data-sort="buyPrice">
+				Сумма покупки <span class="sort-indicator material-icons"></span>
+			    </span>
+			    <span class="value">$${availableVolumeUsd.toFixed(2)}</span>
+			</div>
+			<div class="info-item price-sell">
+			    <span class="label sort-header" data-sort="profit">
+				Профит в USD <span class="sort-indicator material-icons"></span>
+			    </span>
+			    <span class="value">$${profitUsd.toFixed(2)}</span>
+			</div>
+		    </div>
+		</div>
+		<div class="bottom-info">
+		    <span class="pair-timer">15с</span>
+		    <span class="material-icons pin-icon">push_pin</span>
+		</div>
+	    </div>
 	    `;
 	
 	    // Добавляем обработчик для кнопки закрепления
