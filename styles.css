@@ -814,10 +814,6 @@ body {
     gap: 8px;
 }
 
-.pairs-container:not(.grid) .info-item.price-sell,
-.pairs-container:not(.grid) .info-item.price-buy {
-    display: none !important;
-}
 
 .pairs-container.grid .exchanges {
     display: flex;
