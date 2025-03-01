@@ -1419,9 +1419,10 @@ body {
 /* Стили для заголовков сортировки */
 .sort-header {
     cursor: pointer;
-    display: flex;
+    display: inline-flex; /* Меняем на inline-flex */
     align-items: center;
     user-select: none;
+    position: relative; /* Добавляем для корректного позиционирования */
 }
 
 .sort-header:hover {
@@ -1431,7 +1432,8 @@ body {
 .sort-indicator {
     font-size: 18px;
     opacity: 0.5;
-    margin-left: 2px;
+    margin-left: 4px; /* Небольшой отступ от текста */
+    line-height: 1; /* Выравниваем по вертикали */
 }
 
 .sort-indicator.active {
@@ -1441,13 +1443,10 @@ body {
 
 /* Дополнительные стили для подсветки активной сортировки */
 .label.sort-header {
-    position: relative;
-    padding-right: 18px;
+    padding-right: 0; /* Убираем отступ справа */
 }
 
 .sort-indicator {
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
+    position: static; /* Вместо absolute */
+    transform: none; /* Убираем transform */
 }
