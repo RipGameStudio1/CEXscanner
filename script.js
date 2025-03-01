@@ -11,22 +11,41 @@ function stopPairTimer(pairItem) {
 
 // Функция для правильного форматирования цен
 function formatPrice(num) {
-    // Если это очень маленькое число, отображаем в полном десятичном виде
-    if (Math.abs(num) < 0.0001) {
-        return num.toString().replace(/e[+-]\d+/, function(match) {
-            const expo = parseInt(match.slice(1));
-            if (match[0] === 'e-') {
-                let result = '0.';
-                for (let i = 0; i < expo - 1; i++) {
-                    result += '0';
-                }
-                return result + num.toString().replace('.', '').replace(/e-\d+/, '');
+    if (num === undefined || num === null) return '0';
+    
+    // Преобразуем число в строку
+    let str = num.toString();
+    
+    // Проверяем, содержит ли строка научную нотацию (e+ или e-)
+    if (str.includes('e')) {
+        // Получаем базу и экспоненту
+        const parts = str.split('e');
+        const base = parts[0];
+        const exponent = parseInt(parts[1]);
+        
+        // Если отрицательная экспонента (маленькое число)
+        if (parts[1].includes('-')) {
+            // Создаем строку с нужным количеством нулей после запятой
+            let result = '0.';
+            for (let i = 0; i < Math.abs(exponent) - 1; i++) {
+                result += '0';
             }
-            return num.toString();
-        });
+            return result + base.replace('.', '');
+        } 
+        // Если положительная экспонента (большое число)
+        else {
+            const baseWithoutDot = base.replace('.', '');
+            const zerosToAdd = exponent - (baseWithoutDot.length - 1);
+            let result = baseWithoutDot;
+            for (let i = 0; i < zerosToAdd; i++) {
+                result += '0';
+            }
+            return result;
+        }
     }
-    // Обычные числа форматируем с двумя знаками после запятой
-    return parseFloat(num).toFixed(2);
+    
+    // Если число обычное, возвращаем как есть
+    return str;
 }
 
 function clearAllTimers() {
@@ -552,6 +571,10 @@ async function updatePairs() {
 	        displayCommission = commissionValue.toString().substring(0, 6) + "... " + coinSymbol;
 	    }
 	    
+	    // Форматируем цены в полном представлении
+	    const formattedBuyPrice = formatPrice(pairData.buy_price);
+	    const formattedSellPrice = formatPrice(pairData.sell_price);
+	    
 	    // Расчет профита в USD
 	    const availableVolumeUsd = pairData.available_volume_usd || 0;
 	    const spreadPercent = pairData.spread || 0;
@@ -561,11 +584,11 @@ async function updatePairs() {
 	        <div class="exchanges">
 	            <div class="buy-exchange" data-url="${buyUrl}">
 	                <span class="exchange-name">${pairData.buy_exchange}</span>
-	                <span class="exchange-price">$${formatPrice(pairData.buy_price)}</span>
+	                <span class="exchange-price">$${formattedBuyPrice}</span>
 	            </div>
 	            <div class="sell-exchange" data-url="${sellUrl}">
 	                <span class="exchange-name">${pairData.sell_exchange}</span>
-	                <span class="exchange-price">$${formatPrice(pairData.sell_price)}</span>
+	                <span class="exchange-price">$${formattedSellPrice}</span>
 	            </div>
 	        </div>
 	        <div class="pair-details">
