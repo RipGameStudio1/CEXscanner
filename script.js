@@ -1,102 +1,10 @@
 const API_URL = 'https://underground-mia-slimeapp-847f161d.koyeb.app';
 
+// Глобальные переменные для сортировки
 let currentSortField = null;
 let currentSortDirection = 'asc'; // 'asc' или 'desc'
 
-function stopPairTimer(pairItem) {
-    const timerId = pairItem.dataset.timerId;
-    if (timerId) {
-        clearInterval(timerId);
-        delete pairItem.dataset.timerId;
-    }
-}
-
-// Функция для сортировки существующих карточек
-function sortPairItems(field, direction) {
-    // Обновляем глобальное состояние
-    currentSortField = field;
-    currentSortDirection = direction;
-    
-    // Получаем все карточки
-    const pairItems = Array.from(pairsContainer.querySelectorAll('.pair-item'));
-    
-    // Разделяем на закрепленные и обычные
-    const pinnedItems = pairItems.filter(item => item.dataset.isPinned === '1');
-    const regularItems = pairItems.filter(item => item.dataset.isPinned === '0');
-    
-    // Сортируем только обычные карточки
-    regularItems.sort((a, b) => {
-        let valueA, valueB;
-        
-        // Определяем значения для сравнения в зависимости от поля
-        switch (field) {
-            case 'pair':
-            case 'network':
-                valueA = a.dataset[field].toLowerCase();
-                valueB = b.dataset[field].toLowerCase();
-                break;
-            case 'spread':
-            case 'buyPrice':
-            case 'profit':
-                valueA = parseFloat(a.dataset[field]);
-                valueB = parseFloat(b.dataset[field]);
-                break;
-            default:
-                return 0;
-        }
-        
-        // Сортировка в зависимости от направления
-        if (direction === 'asc') {
-            return valueA > valueB ? 1 : -1;
-        } else {
-            return valueA < valueB ? 1 : -1;
-        }
-    });
-    
-    // Сначала удаляем все карточки из DOM
-    pairItems.forEach(item => item.remove());
-    
-    // Добавляем сначала закрепленные, потом отсортированные обычные
-    pinnedItems.forEach(item => pairsContainer.appendChild(item));
-    regularItems.forEach(item => pairsContainer.appendChild(item));
-    
-    // Обновляем индикаторы сортировки
-    updateSortIndicators(field, direction);
-}
-
-// Функция для обновления индикаторов сортировки
-function updateSortIndicators(field, direction) {
-    // Сначала удаляем все индикаторы
-    document.querySelectorAll('.sort-indicator').forEach(el => {
-        el.textContent = '';
-        el.classList.remove('active');
-    });
-    
-    // Устанавливаем активный индикатор
-    const sortHeader = document.querySelector(`.sort-header[data-sort="${field}"]`);
-    if (sortHeader) {
-        const indicator = sortHeader.querySelector('.sort-indicator');
-        indicator.textContent = direction === 'asc' ? 'arrow_drop_up' : 'arrow_drop_down';
-        indicator.classList.add('active');
-    }
-}
-
-// Обработчик клика на заголовок для сортировки
-function handleSortClick(e) {
-    const sortHeader = e.currentTarget;
-    const field = sortHeader.dataset.sort;
-    
-    // Определяем направление: если то же поле, то меняем направление, иначе используем asc
-    let direction = 'asc';
-    if (field === currentSortField) {
-        direction = currentSortDirection === 'asc' ? 'desc' : 'asc';
-    }
-    
-    // Выполняем сортировку
-    sortPairItems(field, direction);
-}
-
-// Функция для правильного форматирования цен
+// Функция для правильного отображения цен в полном формате
 function formatPrice(num) {
     if (num === undefined || num === null) return '0';
     
@@ -133,6 +41,14 @@ function formatPrice(num) {
     
     // Если число обычное, возвращаем как есть
     return str;
+}
+
+function stopPairTimer(pairItem) {
+    const timerId = pairItem.dataset.timerId;
+    if (timerId) {
+        clearInterval(timerId);
+        delete pairItem.dataset.timerId;
+    }
 }
 
 function clearAllTimers() {
@@ -221,6 +137,17 @@ function updatePairTimer(pairItem, timerElement) {
     timerElement.textContent = timerText;
 }
 
+// Функция для обновления всех таймеров
+function updateAllTimers() {
+    const pairItems = document.querySelectorAll('.pair-item');
+    pairItems.forEach(pairItem => {
+        const timerElement = pairItem.querySelector('.pair-timer');
+        if (timerElement) {
+            updatePairTimer(pairItem, timerElement);
+        }
+    });
+}
+
 // Функция форматирования оставшегося времени
 function formatTimeRemaining(expiresAt) {
     if (!expiresAt) return 'не указано';
@@ -257,6 +184,7 @@ function formatTimeRemaining(expiresAt) {
         return 'ошибка';
     }
 }
+
 // Функции для работы с API
 const api = {
     async getUserLicense(telegramId) {
@@ -347,6 +275,7 @@ const api = {
         return await response.json();
     }
 };
+
 // Функция обновления статуса лицензии
 function updateLicenseStatus(license) {
     const licenseStatusElement = document.querySelector('.license-status');
@@ -368,6 +297,7 @@ function updateLicenseStatus(license) {
     const timeRemaining = formatTimeRemaining(expiresAt);
     licenseStatusElement.innerHTML = `${license.type}<br>${timeRemaining}`;
 }
+
 // Периодическая проверка статуса лицензии
 async function checkLicenseStatus(telegramId) {
     try {
@@ -379,6 +309,7 @@ async function checkLicenseStatus(telegramId) {
         console.error('Error checking license status:', error);
     }
 }
+
 // Функция фильтрации пар
 function filterPairs(pairs, filters) {
     return pairs.filter(pair => {
@@ -404,119 +335,374 @@ function filterPairs(pairs, filters) {
     });
 }
 
+// Функция создания карточки пары
+function createPairItem(pairData) {
+    const pairItem = document.createElement('div');
+    pairItem.className = 'pair-item new';
 
-document.addEventListener('DOMContentLoaded', async function() {
-    let currentUser = null;
-    let updateInterval = null;
-
-    // Получаем все необходимые элементы
-    const addPairBtn = document.getElementById('addPairBtn');
-    const buyExchangesBtn = document.getElementById('buyExchanges');
-    const sellExchangesBtn = document.getElementById('sellExchanges');
-    const buyExchangesList = document.getElementById('buyExchangesList');
-    const sellExchangesList = document.getElementById('sellExchangesList');
-    const pairsContainer = document.getElementById('pairsContainer');
-    const viewButtons = document.querySelectorAll('.view-btn');
-    const cryptoFilter = document.getElementById('cryptoFilter');
-    const cryptoList = document.getElementById('cryptoList');
-    const cryptoSearch = document.getElementById('cryptoSearch');
-    const selectAllCheckbox = document.getElementById('selectAllCrypto');
-    const cryptoListContainer = document.querySelector('.crypto-list');
-    const updateIntervalBtn = document.getElementById('updateInterval');
-    const intervalList = document.getElementById('intervalList');
-
-    async function updatePairsWithTimerCleanup() {
-	    // Находим иконку обновления и добавляем класс анимации
-	    const refreshIcon = document.querySelector('#addPairBtn .material-icons');
-	    refreshIcon.classList.add('rotating');
-	    
-	    // Очищаем все таймеры
-	    clearAllTimers();
-	    
-	    try {
-	        // Выполняем обновление пар
-	        await updatePairs();
-	    } finally {
-	        // В любом случае (успех или ошибка) удаляем класс анимации
-	        setTimeout(() => {
-	            refreshIcon.classList.remove('rotating');
-	        }, 500); // Небольшая задержка для лучшего визуального эффекта
-	    }
-	}
-    // Проверка режима просмотра
-    function checkViewMode() {
-        if (window.innerWidth <= 810) {
-            pairsContainer.className = 'pairs-container grid';
-            viewButtons.forEach(btn => {
-                if (btn.dataset.view === 'grid') {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
-        }
+    const pairId = pairData._id.$oid || pairData.pair_id?.$oid || pairData._id;
+    pairItem.dataset.id = pairId;
+    
+    // Сохраняем данные в атрибутах для сортировки
+    pairItem.dataset.pair = pairData.coin_pair;
+    pairItem.dataset.network = pairData.network;
+    pairItem.dataset.spread = pairData.spread || 0;
+    pairItem.dataset.buyPrice = pairData.available_volume_usd || 0;
+    pairItem.dataset.profit = ((pairData.available_volume_usd || 0) * (pairData.spread || 0) / 100);
+    pairItem.dataset.isPinned = pairData.is_pinned ? '1' : '0';
+    
+    if (pairData.alive_time) {
+        pairItem.dataset.aliveTime = pairData.alive_time.$date || pairData.alive_time;
     }
+    
+    // Сохраняем URL для покупки и продажи
+    const buyUrl = pairData.buy_url || '#';
+    const sellUrl = pairData.sell_url || '#';
+    
+    // Обработка длинных значений комиссии
+    let commissionValue = pairData.commission;
+    let coinSymbol = pairData.coin_pair.split('/')[0];
+    let fullCommission = `${commissionValue} ${coinSymbol}`;
+    let displayCommission = fullCommission;
+    
+    // Если число длиннее 6 символов, сокращаем его
+    if (commissionValue.toString().length > 6) {
+        displayCommission = commissionValue.toString().substring(0, 6) + "... " + coinSymbol;
+    }
+    
+    // Форматируем цены в полном представлении
+    const formattedBuyPrice = formatPrice(pairData.buy_price);
+    const formattedSellPrice = formatPrice(pairData.sell_price);
+    
+    // Расчет профита в USD
+    const availableVolumeUsd = pairData.available_volume_usd || 0;
+    const spreadPercent = pairData.spread || 0;
+    const profitUsd = (availableVolumeUsd * spreadPercent / 100);
+    
+    pairItem.innerHTML = `
+        <div class="exchanges">
+            <div class="buy-exchange" data-url="${buyUrl}">
+                <span class="exchange-name">${pairData.buy_exchange}</span>
+                <span class="exchange-price">$${formattedBuyPrice}</span>
+            </div>
+            <div class="sell-exchange" data-url="${sellUrl}">
+                <span class="exchange-name">${pairData.sell_exchange}</span>
+                <span class="exchange-price">$${formattedSellPrice}</span>
+            </div>
+        </div>
+        <div class="pair-details">
+            <div class="pair-info">
+                <div class="pair-network-group">
+                    <div class="info-item">
+                        <span class="label sort-header" data-sort="pair">
+                            Пара <span class="sort-indicator material-icons"></span>
+                        </span>
+                        <span class="value">${pairData.coin_pair}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label sort-header" data-sort="network">
+                            Сеть <span class="sort-indicator material-icons"></span>
+                        </span>
+                        <span class="value">${pairData.network}</span>
+                    </div>
+                </div>
+                <div class="spread-group">
+                    <div class="info-item">
+                        <span class="label sort-header" data-sort="spread">
+                            Спред <span class="sort-indicator material-icons"></span>
+                        </span>
+                        <span class="value">${pairData.spread}%</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Комиссия</span>
+                        <span class="value" title="${fullCommission}">${displayCommission}</span>
+                    </div>
+                </div>
+                <div class="price-group">
+                    <div class="info-item price-buy">
+                        <span class="label sort-header" data-sort="buyPrice">
+                            Сумма покупки <span class="sort-indicator material-icons"></span>
+                        </span>
+                        <span class="value">$${availableVolumeUsd.toFixed(2)}</span>
+                    </div>
+                    <div class="info-item price-sell">
+                        <span class="label sort-header" data-sort="profit">
+                            Профит в USD <span class="sort-indicator material-icons"></span>
+                        </span>
+                        <span class="value">$${profitUsd.toFixed(2)}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="bottom-info">
+                <span class="pair-timer">15с</span>
+                <span class="material-icons pin-icon">push_pin</span>
+            </div>
+        </div>
+    `;
 
-    window.addEventListener('load', checkViewMode);
-    window.addEventListener('resize', checkViewMode);
-
-    // Инициализация пользователя из Telegram WebApp
-	if (window.Telegram && window.Telegram.WebApp) {
-    const telegramUser = window.Telegram.WebApp.initDataUnsafe.user;
-    if (telegramUser) {
+    // Добавляем обработчик для кнопки закрепления
+    const pinIcon = pairItem.querySelector('.pin-icon');
+    if (pairData.is_pinned) {
+        pinIcon.classList.add('pinned');
+    }
+    pinIcon.addEventListener('click', async (event) => {
+        event.stopPropagation(); // Предотвращаем всплытие события    
+        if (!currentUser) return;
+    
+        const isPinned = pinIcon.classList.contains('pinned');
         try {
-            // Добавим логи для отладки
-            console.log('Telegram user data:', telegramUser);
-            
-            currentUser = await api.getUser(telegramUser.id.toString());
-            document.querySelector('.username').textContent = '@' + telegramUser.username;
-            updateLicenseStatus(currentUser.license);
-
-            // Обновляем статус лицензии каждую минуту
-            setInterval(() => {
-                updateLicenseStatus(currentUser.license);
-            }, 60000);
-
+            if (isPinned) {
+                await api.unpinPair(pairId, currentUser.telegram_id);
+                pinIcon.classList.remove('pinned');
+                pinIcon.style.color = '#666';
+            } else {
+                await api.pinPair(pairId, currentUser.telegram_id);
+                pinIcon.classList.add('pinned');
+                pinIcon.style.color = '#2196F3';
+            }
+            setTimeout(() => {
+                updatePairs();
+            }, 100);
         } catch (error) {
-            // Получаем username, используя first_name если username не доступен
-            const username = telegramUser.username || telegramUser.first_name || 'unknown';
-            console.log('Creating new user:', {
-                id: telegramUser.id.toString(),
-                username: username
-            });
-
-            currentUser = await api.createUser(telegramUser.id.toString(), username);
-            document.querySelector('.username').textContent = '@' + username;
-            updateLicenseStatus(currentUser.license);
+            console.error('Error toggling pin:', error);
         }
-    }
-}
-
-    // Заполняем списки бирж
-    try {
-    const exchanges = await api.getExchanges();
-    const coins = await api.getCoins();
-
-    // Очищаем списки перед добавлением
-    buyExchangesList.innerHTML = '';
-    sellExchangesList.innerHTML = '';
-
-    exchanges.forEach(exchange => {
-        buyExchangesList.innerHTML += `
-            <label><input type="checkbox" value="${exchange.symbol}"> ${exchange.name}</label>
-        `;
-        sellExchangesList.innerHTML += `
-            <label><input type="checkbox" value="${exchange.symbol}"> ${exchange.name}</label>
-        `;
     });
 
-    // Заполняем список монет
-    renderCryptoList(coins);
-} catch (error) {
-    console.error('Error loading initial data:', error);
+    // Добавляем обработчики для зон покупки и продажи
+    const buyExchange = pairItem.querySelector('.buy-exchange');
+    const sellExchange = pairItem.querySelector('.sell-exchange');
+    
+    buyExchange.addEventListener('click', () => {
+        const url = buyExchange.dataset.url;
+        if (url && url !== '#') {
+            window.open(url, '_blank');
+        }
+    });
+    
+    sellExchange.addEventListener('click', () => {
+        const url = sellExchange.dataset.url;
+        if (url && url !== '#') {
+            window.open(url, '_blank');
+        }
+    });
+    
+    const timerElement = pairItem.querySelector('.pair-timer');
+    startPairTimer(pairItem);
+    return pairItem;
 }
 
-    // Функция обновления пар
+// Функция для обновления существующей карточки
+function updateExistingCard(cardElement, pairData) {
+    // Обновляем данные для сортировки
+    cardElement.dataset.pair = pairData.coin_pair;
+    cardElement.dataset.network = pairData.network;
+    cardElement.dataset.spread = pairData.spread || 0;
+    cardElement.dataset.buyPrice = pairData.available_volume_usd || 0;
+    cardElement.dataset.profit = ((pairData.available_volume_usd || 0) * (pairData.spread || 0) / 100);
+    cardElement.dataset.isPinned = pairData.is_pinned ? '1' : '0';
+    
+    // Обновляем основные данные
+    const buyExchange = cardElement.querySelector('.buy-exchange');
+    const sellExchange = cardElement.querySelector('.sell-exchange');
+    const pairValue = cardElement.querySelector('.pair-network-group .info-item:nth-child(1) .value');
+    const networkValue = cardElement.querySelector('.pair-network-group .info-item:nth-child(2) .value');
+    const spreadValue = cardElement.querySelector('.spread-group .info-item:nth-child(1) .value');
+    
+    // Обработка длинных значений комиссии
+    let commissionValue = pairData.commission;
+    let coinSymbol = pairData.coin_pair.split('/')[0];
+    let fullCommission = `${commissionValue} ${coinSymbol}`;
+    let displayCommission = fullCommission;
+    
+    // Если число длиннее 6 символов, сокращаем его
+    if (commissionValue.toString().length > 6) {
+        displayCommission = commissionValue.toString().substring(0, 6) + "... " + coinSymbol;
+    }
+    
+    const commissionElement = cardElement.querySelector('.spread-group .info-item:nth-child(2) .value');
+    
+    // Расчет профита в USD
+    const availableVolumeUsd = pairData.available_volume_usd || 0;
+    const spreadPercent = pairData.spread || 0;
+    const profitUsd = (availableVolumeUsd * spreadPercent / 100);
+    
+    // Обновляем элементы
+    buyExchange.querySelector('.exchange-name').textContent = pairData.buy_exchange;
+    buyExchange.querySelector('.exchange-price').textContent = '$' + formatPrice(pairData.buy_price);
+    buyExchange.dataset.url = pairData.buy_url || '#';
+    
+    sellExchange.querySelector('.exchange-name').textContent = pairData.sell_exchange;
+    sellExchange.querySelector('.exchange-price').textContent = '$' + formatPrice(pairData.sell_price);
+    sellExchange.dataset.url = pairData.sell_url || '#';
+    
+    pairValue.textContent = pairData.coin_pair;
+    networkValue.textContent = pairData.network;
+    spreadValue.textContent = pairData.spread + '%';
+    
+    commissionElement.textContent = displayCommission;
+    commissionElement.title = fullCommission;
+    
+    const sumBuyElement = cardElement.querySelector('.price-buy .value');
+    const profitElement = cardElement.querySelector('.price-sell .value');
+    
+    sumBuyElement.textContent = '$' + availableVolumeUsd.toFixed(2);
+    profitElement.textContent = '$' + profitUsd.toFixed(2);
+    
+    // Обновляем статус закрепления
+    const pinIcon = cardElement.querySelector('.pin-icon');
+    if (pairData.is_pinned) {
+        pinIcon.classList.add('pinned');
+        pinIcon.style.color = '#2196F3';
+    } else {
+        pinIcon.classList.remove('pinned');
+        pinIcon.style.color = '#666';
+    }
+    
+    // Обновляем aliveTime для таймера
+    if (pairData.alive_time) {
+        cardElement.dataset.aliveTime = pairData.alive_time.$date || pairData.alive_time;
+    }
+    
+    // Добавляем класс для анимации обновления
+    cardElement.classList.add('updating');
+    
+    // Удаляем класс через 300 мс для эффекта мигания
+    setTimeout(() => {
+        cardElement.classList.remove('updating');
+    }, 300);
+}
+
+// Функция для сортировки карточек
+function sortPairItems(field, direction) {
+    // Обновляем глобальное состояние
+    currentSortField = field;
+    currentSortDirection = direction;
+    
+    // Получаем все карточки
+    const pairItems = Array.from(document.querySelectorAll('.pair-item'));
+    
+    // Разделяем на закрепленные и обычные
+    const pinnedItems = pairItems.filter(item => item.dataset.isPinned === '1');
+    const regularItems = pairItems.filter(item => item.dataset.isPinned === '0');
+    
+    // Сортируем только обычные карточки
+    regularItems.sort((a, b) => {
+        let valueA, valueB;
+        
+        // Определяем значения для сравнения в зависимости от поля
+        switch (field) {
+            case 'pair':
+            case 'network':
+                valueA = a.dataset[field].toLowerCase();
+                valueB = b.dataset[field].toLowerCase();
+                break;
+            case 'spread':
+            case 'buyPrice':
+            case 'profit':
+                valueA = parseFloat(a.dataset[field]);
+                valueB = parseFloat(b.dataset[field]);
+                break;
+            default:
+                return 0;
+        }
+        
+        // Сортировка в зависимости от направления
+        if (direction === 'asc') {
+            return valueA > valueB ? 1 : -1;
+        } else {
+            return valueA < valueB ? 1 : -1;
+        }
+    });
+    
+    // Сначала удаляем все карточки из DOM
+    pairItems.forEach(item => {
+        if (item.parentNode) {
+            item.parentNode.removeChild(item);
+        }
+    });
+    
+    // Добавляем сначала закрепленные, потом отсортированные обычные
+    const pairsContainer = document.getElementById('pairsContainer');
+    pinnedItems.forEach(item => pairsContainer.appendChild(item));
+    regularItems.forEach(item => pairsContainer.appendChild(item));
+    
+    // Обновляем индикаторы сортировки
+    updateSortIndicators(field, direction);
+}
+
+// Функция для обновления индикаторов сортировки
+function updateSortIndicators(field, direction) {
+    // Сначала удаляем все индикаторы
+    document.querySelectorAll('.sort-indicator').forEach(el => {
+        el.textContent = '';
+        el.classList.remove('active');
+    });
+    
+    // Устанавливаем активный индикатор
+    const sortHeader = document.querySelector(`.sort-header[data-sort="${field}"]`);
+    if (sortHeader) {
+        const indicator = sortHeader.querySelector('.sort-indicator');
+        indicator.textContent = direction === 'asc' ? 'arrow_drop_up' : 'arrow_drop_down';
+        indicator.classList.add('active');
+    }
+}
+
+// Обработчик клика на заголовок для сортировки
+function handleSortClick(e) {
+    const sortHeader = e.currentTarget;
+    const field = sortHeader.dataset.sort;
+    
+    // Определяем направление: если то же поле, то меняем направление, иначе используем asc
+    let direction = 'asc';
+    if (field === currentSortField) {
+        direction = currentSortDirection === 'asc' ? 'desc' : 'asc';
+    }
+    
+    // Выполняем сортировку
+    sortPairItems(field, direction);
+}
+
+// Функция установки обработчиков сортировки
+function setupSortHeaders() {
+    // Находим все заголовки сортировки и добавляем обработчики
+    const sortHeaders = document.querySelectorAll('.sort-header');
+    sortHeaders.forEach(header => {
+        // Удаляем существующие обработчики, чтобы избежать дублирования
+        header.removeEventListener('click', handleSortClick);
+        // Добавляем обработчик
+        header.addEventListener('click', handleSortClick);
+    });
+}
+
+// Функция для рендеринга списка криптовалют
+function renderCryptoList(coins) {
+    const cryptoListContainer = document.querySelector('.crypto-list');
+    cryptoListContainer.innerHTML = coins.map(coin => `
+        <label>
+            <input type="checkbox" value="${coin.symbol}">
+            ${coin.name} (${coin.symbol})
+        </label>
+    `).join('');
+
+    const checkboxes = cryptoListContainer.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', handleCheckboxChange);
+    });
+}
+
+// Обработчик изменения состояния чекбоксов
+function handleCheckboxChange() {
+    const cryptoListContainer = document.querySelector('.crypto-list');
+    const selectAllCheckbox = document.getElementById('selectAllCrypto');
+    
+    const checkboxes = cryptoListContainer.querySelectorAll('input[type="checkbox"]:not(.hidden)');
+    const checkedBoxes = cryptoListContainer.querySelectorAll('input[type="checkbox"]:checked:not(.hidden)');
+    
+    selectAllCheckbox.checked = checkboxes.length === checkedBoxes.length;
+    selectAllCheckbox.indeterminate = checkedBoxes.length > 0 && checkboxes.length !== checkedBoxes.length;
+}
+
+// Функция обновления пар
 async function updatePairs() {
     try {
         if (!currentUser) {
@@ -536,6 +722,10 @@ async function updatePairs() {
         const pairsData = await api.getPairs(currentUser.telegram_id);
         console.log('Received pairs data:', pairsData);
 
+        const cryptoListContainer = document.querySelector('.crypto-list');
+        const buyExchangesList = document.getElementById('buyExchangesList');
+        const sellExchangesList = document.getElementById('sellExchangesList');
+        
         const filters = {
             selected_coins: Array.from(cryptoListContainer.querySelectorAll('input:checked'))
                 .map(cb => cb.value),
@@ -658,6 +848,14 @@ async function updatePairs() {
                 : 'Нет активных пар';
             pairsContainer.appendChild(noResultsMessage);
         }
+        
+        // Устанавливаем обработчики сортировки после обновления
+        setupSortHeaders();
+        
+        // Если была активна сортировка, применяем её
+        if (currentSortField) {
+            sortPairItems(currentSortField, currentSortDirection);
+        }
 
     } catch (error) {
         console.error('Error updating pairs:', error);
@@ -665,259 +863,119 @@ async function updatePairs() {
     }
 }
 
-// Функция для обновления существующей карточки без пересоздания
-function updateExistingCard(cardElement, pairData) {
-    // Обновляем основные данные
-    const buyExchange = cardElement.querySelector('.buy-exchange');
-    const sellExchange = cardElement.querySelector('.sell-exchange');
-    const pairValue = cardElement.querySelector('.info-item:nth-child(1) .value');
-    const networkValue = cardElement.querySelector('.info-item:nth-child(2) .value');
-    const spreadValue = cardElement.querySelector('.spread-group .info-item:nth-child(1) .value');
+// Функция обновления пар с очисткой таймеров и анимацией
+async function updatePairsWithTimerCleanup() {
+    // Находим иконку обновления и добавляем класс анимации
+    const refreshIcon = document.querySelector('#addPairBtn .material-icons');
+    refreshIcon.classList.add('rotating');
     
-    // Обработка длинных значений комиссии
-    let commissionValue = pairData.commission;
-    let coinSymbol = pairData.coin_pair.split('/')[0];
-    let fullCommission = `${commissionValue} ${coinSymbol}`;
-    let displayCommission = fullCommission;
+    // Очищаем все таймеры
+    clearAllTimers();
     
-    // Если число длиннее 6 символов, сокращаем его
-    if (commissionValue.toString().length > 6) {
-        displayCommission = commissionValue.toString().substring(0, 6) + "... " + coinSymbol;
+    try {
+        // Выполняем обновление пар
+        await updatePairs();
+    } finally {
+        // В любом случае (успех или ошибка) удаляем класс анимации
+        setTimeout(() => {
+            refreshIcon.classList.remove('rotating');
+        }, 500);
     }
-    
-    const commissionElement = cardElement.querySelector('.spread-group .info-item:nth-child(2) .value');
-    
-    // Расчет профита в USD
-    const availableVolumeUsd = pairData.available_volume_usd || 0;
-    const spreadPercent = pairData.spread || 0;
-    const profitUsd = (availableVolumeUsd * spreadPercent / 100);
-    
-    // Обновляем элементы
-	// Обновляем данные для сортировки
-    cardElement.dataset.pair = pairData.coin_pair;
-    cardElement.dataset.network = pairData.network;
-    cardElement.dataset.spread = pairData.spread || 0;
-    cardElement.dataset.buyPrice = pairData.available_volume_usd || 0;
-    cardElement.dataset.profit = ((pairData.available_volume_usd || 0) * (pairData.spread || 0) / 100);
-    cardElement.dataset.isPinned = pairData.is_pinned ? '1' : '0';
-	
-    buyExchange.querySelector('.exchange-name').textContent = pairData.buy_exchange;
-    buyExchange.querySelector('.exchange-price').textContent = '$' + formatPrice(pairData.buy_price);
-    buyExchange.dataset.url = pairData.buy_url || '#';
-    
-    sellExchange.querySelector('.exchange-name').textContent = pairData.sell_exchange;
-    sellExchange.querySelector('.exchange-price').textContent = '$' + formatPrice(pairData.sell_price);
-    sellExchange.dataset.url = pairData.sell_url || '#';
-    
-    pairValue.textContent = pairData.coin_pair;
-    networkValue.textContent = pairData.network;
-    spreadValue.textContent = pairData.spread + '%';
-    
-    commissionElement.textContent = displayCommission;
-    commissionElement.title = fullCommission;
-    
-    const sumBuyElement = cardElement.querySelector('.price-buy .value');
-    const profitElement = cardElement.querySelector('.price-sell .value');
-    
-    sumBuyElement.textContent = '$' + availableVolumeUsd.toFixed(2);
-    profitElement.textContent = '$' + profitUsd.toFixed(2);
-    
-    // Обновляем статус закрепления
-    const pinIcon = cardElement.querySelector('.pin-icon');
-    if (pairData.is_pinned) {
-        pinIcon.classList.add('pinned');
-        pinIcon.style.color = '#2196F3';
-    } else {
-        pinIcon.classList.remove('pinned');
-        pinIcon.style.color = '#666';
-    }
-    
-    // Обновляем aliveTime для таймера
-    if (pairData.alive_time) {
-        cardElement.dataset.aliveTime = pairData.alive_time.$date || pairData.alive_time;
-    }
-    
-    // Добавляем класс для анимации обновления
-    cardElement.classList.add('updating');
-    
-    // Удаляем класс через 300 мс для эффекта мигания
-    setTimeout(() => {
-        cardElement.classList.remove('updating');
-    }, 300);
 }
-    // Рендеринг списка криптовалют
-    function renderCryptoList(coins) {
-        cryptoListContainer.innerHTML = coins.map(coin => `
-            <label>
-                <input type="checkbox" value="${coin.symbol}">
-                ${coin.name} (${coin.symbol})
-            </label>
-        `).join('');
 
-        const checkboxes = cryptoListContainer.querySelectorAll('input[type="checkbox"]');
-        checkboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', handleCheckboxChange);
+// Обработчик при загрузке DOM
+document.addEventListener('DOMContentLoaded', async function() {
+    let currentUser = null;
+    let updateInterval = null;
+
+    // Получаем все необходимые элементы
+    const addPairBtn = document.getElementById('addPairBtn');
+    const buyExchangesBtn = document.getElementById('buyExchanges');
+    const sellExchangesBtn = document.getElementById('sellExchanges');
+    const buyExchangesList = document.getElementById('buyExchangesList');
+    const sellExchangesList = document.getElementById('sellExchangesList');
+    const pairsContainer = document.getElementById('pairsContainer');
+    const viewButtons = document.querySelectorAll('.view-btn');
+    const cryptoFilter = document.getElementById('cryptoFilter');
+    const cryptoList = document.getElementById('cryptoList');
+    const cryptoSearch = document.getElementById('cryptoSearch');
+    const selectAllCheckbox = document.getElementById('selectAllCrypto');
+    const cryptoListContainer = document.querySelector('.crypto-list');
+    const updateIntervalBtn = document.getElementById('updateInterval');
+    const intervalList = document.getElementById('intervalList');
+
+    // Проверка режима просмотра
+    function checkViewMode() {
+        if (window.innerWidth <= 601) {
+            pairsContainer.className = 'pairs-container grid';
+            viewButtons.forEach(btn => {
+                if (btn.dataset.view === 'grid') {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+    }
+
+    window.addEventListener('load', checkViewMode);
+    window.addEventListener('resize', checkViewMode);
+
+    // Инициализация пользователя из Telegram WebApp
+    if (window.Telegram && window.Telegram.WebApp) {
+        const telegramUser = window.Telegram.WebApp.initDataUnsafe.user;
+        if (telegramUser) {
+            try {
+                // Добавим логи для отладки
+                console.log('Telegram user data:', telegramUser);
+                
+                currentUser = await api.getUser(telegramUser.id.toString());
+                document.querySelector('.username').textContent = '@' + telegramUser.username;
+                updateLicenseStatus(currentUser.license);
+
+                // Обновляем статус лицензии каждую минуту
+                setInterval(() => {
+                    updateLicenseStatus(currentUser.license);
+                }, 60000);
+
+            } catch (error) {
+                // Получаем username, используя first_name если username не доступен
+                const username = telegramUser.username || telegramUser.first_name || 'unknown';
+                console.log('Creating new user:', {
+                    id: telegramUser.id.toString(),
+                    username: username
+                });
+
+                currentUser = await api.createUser(telegramUser.id.toString(), username);
+                document.querySelector('.username').textContent = '@' + username;
+                updateLicenseStatus(currentUser.license);
+            }
+        }
+    }
+
+    // Заполняем списки бирж
+    try {
+        const exchanges = await api.getExchanges();
+        const coins = await api.getCoins();
+
+        // Очищаем списки перед добавлением
+        buyExchangesList.innerHTML = '';
+        sellExchangesList.innerHTML = '';
+
+        exchanges.forEach(exchange => {
+            buyExchangesList.innerHTML += `
+                <label><input type="checkbox" value="${exchange.symbol}"> ${exchange.name}</label>
+            `;
+            sellExchangesList.innerHTML += `
+                <label><input type="checkbox" value="${exchange.symbol}"> ${exchange.name}</label>
+            `;
         });
+
+        // Заполняем список монет
+        renderCryptoList(coins);
+    } catch (error) {
+        console.error('Error loading initial data:', error);
     }
-
-    // Обработчик изменения состояния чекбоксов
-    function handleCheckboxChange() {
-        const checkboxes = cryptoListContainer.querySelectorAll('input[type="checkbox"]:not(.hidden)');
-        const checkedBoxes = cryptoListContainer.querySelectorAll('input[type="checkbox"]:checked:not(.hidden)');
-        
-        selectAllCheckbox.checked = checkboxes.length === checkedBoxes.length;
-        selectAllCheckbox.indeterminate = checkedBoxes.length > 0 && checkboxes.length !== checkedBoxes.length;
-    }
-    
-
-    // Создание карточки пары
-    function createPairItem(pairData) {
-	    const pairItem = document.createElement('div');
-	    pairItem.className = 'pair-item new';
-	
-	    const pairId = pairData._id.$oid || pairData.pair_id?.$oid || pairData._id;
-	    pairItem.dataset.id = pairId;
-	    
-	    if (pairData.alive_time) {
-	        pairItem.dataset.aliveTime = pairData.alive_time.$date || pairData.alive_time;
-	    }
-	    
-	    // Сохраняем URL для покупки и продажи
-	    const buyUrl = pairData.buy_url || '#';
-	    const sellUrl = pairData.sell_url || '#';
-	    
-	    // Обработка длинных значений комиссии
-	    let commissionValue = pairData.commission;
-	    let coinSymbol = pairData.coin_pair.split('/')[0];
-	    let fullCommission = `${commissionValue} ${coinSymbol}`;
-	    let displayCommission = fullCommission;
-	    
-	    // Если число длиннее 6 символов, сокращаем его
-	    if (commissionValue.toString().length > 6) {
-	        displayCommission = commissionValue.toString().substring(0, 6) + "... " + coinSymbol;
-	    }
-	    
-	    // Форматируем цены в полном представлении
-	    const formattedBuyPrice = formatPrice(pairData.buy_price);
-	    const formattedSellPrice = formatPrice(pairData.sell_price);
-	    
-	    // Расчет профита в USD
-	    const availableVolumeUsd = pairData.available_volume_usd || 0;
-	    const spreadPercent = pairData.spread || 0;
-	    const profitUsd = (availableVolumeUsd * spreadPercent / 100);
-	    
-	    pairItem.innerHTML = `
-	    <div class="exchanges">
-		<div class="buy-exchange" data-url="${buyUrl}">
-		    <span class="exchange-name">${pairData.buy_exchange}</span>
-		    <span class="exchange-price">$${formatPrice(pairData.buy_price)}</span>
-		</div>
-		<div class="sell-exchange" data-url="${sellUrl}">
-		    <span class="exchange-name">${pairData.sell_exchange}</span>
-		    <span class="exchange-price">$${formatPrice(pairData.sell_price)}</span>
-		</div>
-	    </div>
-	    <div class="pair-details">
-		<div class="pair-info">
-		    <div class="pair-network-group">
-			<div class="info-item">
-			    <span class="label sort-header" data-sort="pair">
-				Пара <span class="sort-indicator material-icons"></span>
-			    </span>
-			    <span class="value">${pairData.coin_pair}</span>
-			</div>
-			<div class="info-item">
-			    <span class="label sort-header" data-sort="network">
-				Сеть <span class="sort-indicator material-icons"></span>
-			    </span>
-			    <span class="value">${pairData.network}</span>
-			</div>
-		    </div>
-		    <div class="spread-group">
-			<div class="info-item">
-			    <span class="label sort-header" data-sort="spread">
-				Спред <span class="sort-indicator material-icons"></span>
-			    </span>
-			    <span class="value">${pairData.spread}%</span>
-			</div>
-			<div class="info-item">
-			    <span class="label">Комиссия</span>
-			    <span class="value" title="${fullCommission}">${displayCommission}</span>
-			</div>
-		    </div>
-		    <div class="price-group">
-			<div class="info-item price-buy">
-			    <span class="label sort-header" data-sort="buyPrice">
-				Сумма покупки <span class="sort-indicator material-icons"></span>
-			    </span>
-			    <span class="value">$${availableVolumeUsd.toFixed(2)}</span>
-			</div>
-			<div class="info-item price-sell">
-			    <span class="label sort-header" data-sort="profit">
-				Профит в USD <span class="sort-indicator material-icons"></span>
-			    </span>
-			    <span class="value">$${profitUsd.toFixed(2)}</span>
-			</div>
-		    </div>
-		</div>
-		<div class="bottom-info">
-		    <span class="pair-timer">15с</span>
-		    <span class="material-icons pin-icon">push_pin</span>
-		</div>
-	    </div>
-	    `;
-	
-	    // Добавляем обработчик для кнопки закрепления
-	    const pinIcon = pairItem.querySelector('.pin-icon');
-	    if (pairData.is_pinned) {
-	        pinIcon.classList.add('pinned');
-	    }
-	    pinIcon.addEventListener('click', async (event) => {
-	        event.stopPropagation(); // Предотвращаем всплытие события    
-	        if (!currentUser) return;
-	    
-	        const isPinned = pinIcon.classList.contains('pinned');
-	        try {
-	            if (isPinned) {
-	                await api.unpinPair(pairId, currentUser.telegram_id);
-	                pinIcon.classList.remove('pinned');
-	                pinIcon.style.color = '#666';
-	            } else {
-	                await api.pinPair(pairId, currentUser.telegram_id);
-	                pinIcon.classList.add('pinned');
-	                pinIcon.style.color = '#2196F3';
-	            }
-	            setTimeout(() => {
-	                updatePairs();
-	            }, 100);
-	        } catch (error) {
-	            console.error('Error toggling pin:', error);
-	        }
-	    });
-	
-	    // Добавляем обработчики для зон покупки и продажи
-	    const buyExchange = pairItem.querySelector('.buy-exchange');
-	    const sellExchange = pairItem.querySelector('.sell-exchange');
-	    
-	    buyExchange.addEventListener('click', () => {
-	        const url = buyExchange.dataset.url;
-	        if (url && url !== '#') {
-	            window.open(url, '_blank');
-	        }
-	    });
-	    
-	    sellExchange.addEventListener('click', () => {
-	        const url = sellExchange.dataset.url;
-	        if (url && url !== '#') {
-	            window.open(url, '_blank');
-	        }
-	    });
-	    
-	    const timerElement = pairItem.querySelector('.pair-timer');
-	    startPairTimer(pairItem);
-	    return pairItem;
-	}
-
 
     // Обработчики событий
     selectAllCheckbox.addEventListener('change', function() {
@@ -1017,6 +1075,9 @@ function updateExistingCard(cardElement, pairData) {
             
             setTimeout(() => {
                 pairsContainer.className = 'pairs-container ' + btn.dataset.view;
+                
+                // После переключения вида, устанавливаем обработчики сортировки
+                setTimeout(setupSortHeaders, 100);
             }, 50);
 
             setTimeout(() => {
@@ -1037,19 +1098,26 @@ function updateExistingCard(cardElement, pairData) {
             intervalList.classList.remove('show');
         }
     });
+
     // Анимируем иконку при первоначальной загрузке
     const refreshIcon = document.querySelector('#addPairBtn .material-icons');
     if (refreshIcon) {
         refreshIcon.classList.add('rotating');
     }
+    
     // Первоначальная загрузка пар
     await updatePairs();
+    
+    // Устанавливаем обработчики сортировки после загрузки пар
+    setupSortHeaders();
+    
     // Останавливаем анимацию после загрузки
     if (refreshIcon) {
         setTimeout(() => {
             refreshIcon.classList.remove('rotating');
         }, 500);
     }
+
     // Применяем сохраненные настройки пользователя
     if (currentUser && currentUser.settings) {
         const settings = currentUser.settings;
@@ -1111,33 +1179,50 @@ function updateExistingCard(cardElement, pairData) {
         api.updateUserSettings(currentUser.telegram_id, newSettings)
         .then(() => {
             currentUser.settings = newSettings;
-            updatePairs();
+            updatePairs().then(() => {
+                // После обновления пар, применяем текущую сортировку
+                if (currentSortField) {
+                    sortPairItems(currentSortField, currentSortDirection);
+                }
+                // Обновляем обработчики сортировки для новых элементов
+                setupSortHeaders();
+            });
         })
         .catch(error => console.error('Error updating settings:', error));
     }
 
-
     // Добавляем обработчики изменения фильтров
     cryptoListContainer.addEventListener('change', () => {
-    handleFiltersChange();
-    handleCheckboxChange();
-    });;
+        handleFiltersChange();
+        handleCheckboxChange();
+    });
+    
     buyExchangesList.addEventListener('change', handleFiltersChange);
     sellExchangesList.addEventListener('change', handleFiltersChange);
 
+    // Обработчик добавления новой пары (обновления)
     addPairBtn.addEventListener('click', async () => {
-	    // Добавляем анимацию при клике
-	    const refreshIcon = addPairBtn.querySelector('.material-icons');
-	    refreshIcon.classList.add('rotating');
-	    
-	    try {
-	        await updatePairs();
-	    } finally {
-	        setTimeout(() => {
-	            refreshIcon.classList.remove('rotating');
-	        }, 500);
-	    }
+        // Добавляем анимацию при клике
+        const refreshIcon = addPairBtn.querySelector('.material-icons');
+        refreshIcon.classList.add('rotating');
+        
+        try {
+            await updatePairs();
+            
+            // После обновления, применяем текущую сортировку
+            if (currentSortField) {
+                sortPairItems(currentSortField, currentSortDirection);
+            }
+            
+            // Обновляем обработчики сортировки для новых элементов
+            setupSortHeaders();
+        } finally {
+            setTimeout(() => {
+                refreshIcon.classList.remove('rotating');
+            }, 500);
+        }
     });
+
     // Функция для форматирования времени последнего обновления
     function formatLastUpdated(timestamp) {
         const now = new Date();
