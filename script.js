@@ -624,8 +624,8 @@ function updateExistingCard(cardElement, pairData) {
     const sumBuyElement = cardElement.querySelector('.price-buy .value');
     const profitElement = cardElement.querySelector('.price-sell .value');
     
-    sumBuyElement.textContent = '$' + formatPrice(availableVolumeUsd);
-    profitElement.textContent = '$' + formatPrice(profitUsd);
+    sumBuyElement.textContent = '$' + availableVolumeUsd.toFixed(2);
+    profitElement.textContent = '$' + profitUsd.toFixed(2);
     
     // Обновляем статус закрепления
     const pinIcon = cardElement.querySelector('.pin-icon');
