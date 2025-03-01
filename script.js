@@ -339,9 +339,23 @@ document.addEventListener('DOMContentLoaded', async function() {
     const intervalList = document.getElementById('intervalList');
 
     async function updatePairsWithTimerCleanup() {
-        clearAllTimers();
-        await updatePairs();
-    }
+	    // Находим иконку обновления и добавляем класс анимации
+	    const refreshIcon = document.querySelector('#addPairBtn .material-icons');
+	    refreshIcon.classList.add('rotating');
+	    
+	    // Очищаем все таймеры
+	    clearAllTimers();
+	    
+	    try {
+	        // Выполняем обновление пар
+	        await updatePairs();
+	    } finally {
+	        // В любом случае (успех или ошибка) удаляем класс анимации
+	        setTimeout(() => {
+	            refreshIcon.classList.remove('rotating');
+	        }, 500); // Небольшая задержка для лучшего визуального эффекта
+	    }
+	}
     // Проверка режима просмотра
     function checkViewMode() {
         if (window.innerWidth <= 810) {
@@ -918,10 +932,19 @@ function updateExistingCard(cardElement, pairData) {
             intervalList.classList.remove('show');
         }
     });
-
+    // Анимируем иконку при первоначальной загрузке
+    const refreshIcon = document.querySelector('#addPairBtn .material-icons');
+    if (refreshIcon) {
+        refreshIcon.classList.add('rotating');
+    }
     // Первоначальная загрузка пар
     await updatePairs();
-
+    // Останавливаем анимацию после загрузки
+    if (refreshIcon) {
+        setTimeout(() => {
+            refreshIcon.classList.remove('rotating');
+        }, 500);
+    }
     // Применяем сохраненные настройки пользователя
     if (currentUser && currentUser.settings) {
         const settings = currentUser.settings;
@@ -997,13 +1020,19 @@ function updateExistingCard(cardElement, pairData) {
     buyExchangesList.addEventListener('change', handleFiltersChange);
     sellExchangesList.addEventListener('change', handleFiltersChange);
 
-    // Обработчик добавления новой пары (если нужно)
     addPairBtn.addEventListener('click', async () => {
-        // Здесь можно добавить логику создания новой пары
-        // Пока просто обновляем существующие
-        await updatePairs();
+	    // Добавляем анимацию при клике
+	    const refreshIcon = addPairBtn.querySelector('.material-icons');
+	    refreshIcon.classList.add('rotating');
+	    
+	    try {
+	        await updatePairs();
+	    } finally {
+	        setTimeout(() => {
+	            refreshIcon.classList.remove('rotating');
+	        }, 500);
+	    }
     });
-
     // Функция для форматирования времени последнего обновления
     function formatLastUpdated(timestamp) {
         const now = new Date();
