@@ -1354,8 +1354,7 @@ body {
 }
 
 .refresh-btn:hover {
-    top: -4px;
-    left: -4px;
+    transform: translate(-4px, -4px);
     box-shadow: 4px 4px 0 #333;
 }
 
