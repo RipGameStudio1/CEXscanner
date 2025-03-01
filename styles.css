@@ -811,19 +811,6 @@ body {
     display: none !important;
 }
 
-/* Стили для режима сетки */
-.pairs-container.grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
-}
-
-.pairs-container.grid .pair-item {
-    height: 280px;
-    display: flex;
-    flex-direction: column;
-}
-
 .pairs-container.grid .exchanges {
     display: flex;
     border-bottom: 1px solid #333;
