@@ -1140,7 +1140,6 @@ body {
     background: white;
     border: 2px solid #333;
     border-radius: 10px;
-    transform: translate(0px, 0px);
     transition: all 0.1s ease;
     cursor: pointer;
 }
@@ -1159,21 +1158,19 @@ body {
 .add-pair-btn:active,
 .view-btn:active,
 .update-interval:active {
-    transform: translate(0px, 0px); 
+    transform: translate(0, 0); 
     box-shadow: 0 0 0 #333;
 }
 
 /* Тот же эффект для карточек */
 .pair-item {
     position: relative;
-    transform: translate(0px, 0px); 
     transition: all 0.1s ease;
 }
 
 .pair-item:hover {
     transform: translate(-4px, -4px);
     box-shadow: 4px 4px 0 #333;
-    transform: none;
 }
 
 .pair-item:active {
