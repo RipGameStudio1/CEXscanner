@@ -603,14 +603,16 @@ async function updatePairs() {
 	                        <span class="value">${pairData.network}</span>
 	                    </div>
 	                </div>
-	                <div class="info-item">
-	                    <span class="label">Спред</span>
-	                    <span class="value">${pairData.spread}%</span>
-	                </div>
-	                <div class="info-item">
-	                    <span class="label">Комиссия</span>
-	                    <span class="value" title="${fullCommission}">${displayCommission}</span>
-	                </div>
+			 <div class="spread-group">
+		                <div class="info-item">
+		                    <span class="label">Спред</span>
+		                    <span class="value">${pairData.spread}%</span>
+		                </div>
+		                <div class="info-item">
+		                    <span class="label">Комиссия</span>
+		                    <span class="value" title="${fullCommission}">${displayCommission}</span>
+		                </div>
+		 	 </div>
 			<div class="price-group">
 		                <div class="info-item price-buy">
 		                    <span class="label">Сумма покупки</span>
