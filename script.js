@@ -613,11 +613,11 @@ async function updatePairs() {
 	                </div>
 	                <div class="info-item price-buy">
 	                    <span class="label">Сумма покупки</span>
-	                    <span class="value">$${formatPrice(availableVolumeUsd)}</span>
+	                    <span class="value">$${availableVolumeUsd.toFixed(2)}</span>
 	                </div>
 	                <div class="info-item price-sell">
 	                    <span class="label">Профит в USD</span>
-	                    <span class="value">$${formatPrice(profitUsd)}</span>
+	                    <span class="value">$${profitUsd.toFixed(2)}</span>
 	                </div>
 	            </div>
 	            <div class="bottom-info">
