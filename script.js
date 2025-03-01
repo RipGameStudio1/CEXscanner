@@ -427,7 +427,7 @@ function createPairItem(pairData) {
                     </div>
                     <div class="info-item price-sell">
                         <span class="label sort-header" data-sort="profit">
-                            Профит в USD <span class="sort-indicator material-icons"></span>
+                            Профит <span class="sort-indicator material-icons"></span>
                         </span>
                         <span class="value">$${profitUsd.toFixed(2)}</span>
                     </div>
