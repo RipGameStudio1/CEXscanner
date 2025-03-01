@@ -1140,9 +1140,8 @@ body {
     background: white;
     border: 2px solid #333;
     border-radius: 10px;
+    transform: translate(0px, 0px);
     transition: all 0.1s ease;
-    top: 0;
-    left: 0;
     cursor: pointer;
 }
 
@@ -1151,8 +1150,7 @@ body {
 .add-pair-btn:hover,
 .view-btn:hover,
 .update-interval:hover {
-    top: -4px;
-    left: -4px;
+    transform: translate(-4px, -4px);
     box-shadow: 4px 4px 0 #333;
 }
 
@@ -1161,29 +1159,25 @@ body {
 .add-pair-btn:active,
 .view-btn:active,
 .update-interval:active {
-    top: 0;
-    left: 0;
+    transform: translate(0px, 0px); 
     box-shadow: 0 0 0 #333;
 }
 
 /* Тот же эффект для карточек */
 .pair-item {
     position: relative;
-    top: 0;
-    left: 0;
+    transform: translate(0px, 0px); 
     transition: all 0.1s ease;
 }
 
 .pair-item:hover {
-    top: -4px;
-    left: -4px;
+    transform: translate(-4px, -4px);
     box-shadow: 4px 4px 0 #333;
     transform: none;
 }
 
 .pair-item:active {
-    top: 0;
-    left: 0;
+    transform: translate(0px, 0px); 
     box-shadow: 0 0 0 #333;
 }
 
