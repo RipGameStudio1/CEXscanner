@@ -1415,3 +1415,39 @@ body {
     display: inline-block;
     transform-origin: center;
 }
+
+/* Стили для заголовков сортировки */
+.sort-header {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    user-select: none;
+}
+
+.sort-header:hover {
+    color: #2196F3;
+}
+
+.sort-indicator {
+    font-size: 18px;
+    opacity: 0.5;
+    margin-left: 2px;
+}
+
+.sort-indicator.active {
+    opacity: 1;
+    color: #2196F3;
+}
+
+/* Дополнительные стили для подсветки активной сортировки */
+.label.sort-header {
+    position: relative;
+    padding-right: 18px;
+}
+
+.sort-indicator {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
