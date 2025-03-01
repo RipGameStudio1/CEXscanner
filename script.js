@@ -611,14 +611,16 @@ async function updatePairs() {
 	                    <span class="label">Комиссия</span>
 	                    <span class="value" title="${fullCommission}">${displayCommission}</span>
 	                </div>
-	                <div class="info-item price-buy">
-	                    <span class="label">Сумма покупки</span>
-	                    <span class="value">$${availableVolumeUsd.toFixed(2)}</span>
-	                </div>
-	                <div class="info-item price-sell">
-	                    <span class="label">Профит в USD</span>
-	                    <span class="value">$${profitUsd.toFixed(2)}</span>
-	                </div>
+			<div class="price-group">
+		                <div class="info-item price-buy">
+		                    <span class="label">Сумма покупки</span>
+		                    <span class="value">$${availableVolumeUsd.toFixed(2)}</span>
+		                </div>
+		                <div class="info-item price-sell">
+		                    <span class="label">Профит в USD</span>
+		                    <span class="value">$${profitUsd.toFixed(2)}</span>
+		                </div>
+		  	</div>
 	            </div>
 	            <div class="bottom-info">
 	                <span class="pair-timer">15с</span>
