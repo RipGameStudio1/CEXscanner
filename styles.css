@@ -1401,7 +1401,7 @@ body {
 }
 
 .refresh-btn .material-icons.rotating {
-    animation: rotateRefresh 1s linear infinite;
+    animation: rotateRefresh 0.75s linear infinite;
     display: inline-block;
     transform-origin: center;
 }
