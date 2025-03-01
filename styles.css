@@ -690,16 +690,6 @@ body {
     order: 0;
 }
 
-/* Специальные стили для цен в режиме списка */
-.pairs-container:not(.grid) .price-buy,
-.pairs-container:not(.grid) .price-sell {
-    display: none;
-}
-
-.pairs-container:not(.grid) .price-buy .label,
-.pairs-container:not(.grid) .price-sell .label {
-    display: none;
-}
 
 .pairs-container:not(.grid) .price-buy .value,
 .pairs-container:not(.grid) .price-sell .value {
